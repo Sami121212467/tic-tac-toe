@@ -2,51 +2,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Mini Game Arcade</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; background: #f0f0f0; }
-        h1 { margin-top: 20px; }
-        .menu, .game-container { margin-top: 20px; }
-        button { padding: 10px 20px; margin: 10px; font-size: 16px; cursor: pointer; }
-        iframe { width: 90%; height: 500px; border: 2px solid #ccc; margin-top: 20px; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>5-in-1 Game Arcade</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    .menu, .game-container {
+      display: none;
+    }
+    .visible {
+      display: block;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    canvas {
+      border: 2px solid white;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Mini Game Arcade</h1>
-    <div class="menu">
-        <button onclick="loadGame('tic-tac-toe')">Tic Tac Toe</button>
-        <button onclick="loadGame('snake')">Snake</button>
-        <button onclick="loadGame('pong')">Pong</button>
-        <button onclick="loadGame('flappy')">Flappy Bird</button>
-        <button onclick="loadGame('memory')">Memory</button>
-        <button onclick="loadGame('breakout')">Breakout</button>
-        <button onclick="loadGame('platformer')">Platformer</button>
-        <button onclick="loadGame('sudoku')">Sudoku</button>
-        <button onclick="loadGame('2048')">2048</button>
-        <button onclick="loadGame('space')">Space Shooter</button>
-    </div>
-    <div class="game-container">
-        <iframe id="gameFrame" srcdoc="<h2>Select a game from the menu above</h2>"></iframe>
-    </div>
-    <script>
-        const games = {
-            'tic-tac-toe': '<h2>Tic Tac Toe</h2><p>[Tic Tac Toe game goes here]</p>',
-            'snake': '<h2>Snake</h2><p>[Snake game goes here]</p>',
-            'pong': '<h2>Pong</h2><p>[Pong game goes here]</p>',
-            'flappy': '<h2>Flappy Bird</h2><p>[Flappy Bird game goes here]</p>',
-            'memory': '<h2>Memory</h2><p>[Memory game goes here]</p>',
-            'breakout': '<h2>Breakout</h2><p>[Breakout game goes here]</p>',
-            'platformer': '<h2>Platformer</h2><p>[Platformer game goes here]</p>',
-            'sudoku': '<h2>Sudoku</h2><p>[Sudoku game goes here]</p>',
-            '2048': '<h2>2048</h2><p>[2048 game goes here]</p>',
-            'space': '<h2>Space Shooter</h2><p>[Space Shooter game goes here]</p>'
-        };
+  <h1>5-in-1 Game Arcade</h1>
+  <div id="main-menu" class="visible">
+    <button onclick="showGame('tic-tac-toe')">Tic Tac Toe</button>
+    <button onclick="showGame('flappy')">Flappy Bird</button>
+    <button onclick="showGame('pong')">Pong</button>
+    <button onclick="showGame('2048')">2048</button>
+    <button onclick="showGame('space')">Space Shooter</button>
+  </div>
 
-        function loadGame(game) {
-            document.getElementById('gameFrame').srcdoc = games[game];
-        }
-    </script>
+  <div id="tic-tac-toe" class="menu game-container">
+    <h2>Tic Tac Toe</h2>
+    <canvas id="ttt-canvas" width="300" height="300"></canvas>
+    <br><button onclick="goHome()">Back</button>
+  </div>
+
+  <div id="flappy" class="menu game-container">
+    <h2>Flappy Bird</h2>
+    <canvas id="flappy-canvas" width="320" height="480"></canvas>
+    <br><button onclick="goHome()">Back</button>
+  </div>
+
+  <div id="pong" class="menu game-container">
+    <h2>Pong</h2>
+    <canvas id="pong-canvas" width="600" height="400"></canvas>
+    <br><button onclick="goHome()">Back</button>
+  </div>
+
+  <div id="2048" class="menu game-container">
+    <h2>2048</h2>
+    <iframe srcdoc="<!DOCTYPE html><html><body><script src='https://gabrielecirulli.github.io/2048/js/game_manager.js'></script></body></html>" width="500" height="600"></iframe>
+    <br><button onclick="goHome()">Back</button>
+  </div>
+
+  <div id="space" class="menu game-container">
+    <h2>Space Shooter</h2>
+    <canvas id="space-canvas" width="600" height="400"></canvas>
+    <br><button onclick="goHome()">Back</button>
+  </div>
+
+  <script>
+    function showGame(id) {
+      document.querySelectorAll('.menu').forEach(el => el.classList.remove('visible'));
+      document.getElementById(id).classList.add('visible');
+      document.getElementById('main-menu').classList.remove('visible');
+    }
+    function goHome() {
+      document.querySelectorAll('.menu').forEach(el => el.classList.remove('visible'));
+      document.getElementById('main-menu').classList.add('visible');
+    }
+
+    // Placeholder: actual game logic for each canvas will go here (next step)
+  </script>
 </body>
 </html>
