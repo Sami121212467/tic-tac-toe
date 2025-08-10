@@ -1,86 +1,823 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>5-in-1 Game Arcade</title>
-  <style>
-    body {
-      background-color: #111;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-    .menu, .game-container {
-      display: none;
-    }
-    .visible {
-      display: block;
-    }
-    button {
-      margin: 10px;
-      padding: 10px 20px;
-      font-size: 18px;
-      cursor: pointer;
-    }
-    canvas {
-      border: 2px solid white;
-      margin-top: 20px;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mini Game Hub — Tic Tac Toe · Space Invaders · Pong · Flappy Bird</title>
+<style>
+  :root{
+    --bg:#0e0f13; --panel:#171922; --ink:#e8ecf1; --muted:#9aa3af; --accent:#7c5cff; --accent-2:#00d4ff; --danger:#ff4d6d; --win:#22c55e;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+    background: radial-gradient(1200px 700px at 80% -50%, #1b1f2b 0, #0e0f13 60%) no-repeat fixed;
+    color:var(--ink);
+    display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px;
+  }
+  header{width:100%; max-width:1100px; display:flex; align-items:center; justify-content:space-between; gap:10px}
+  h1{font-size:clamp(18px,2.6vw,28px); margin:0; letter-spacing:.2px}
+  .sub{color:var(--muted); font-size:13px}
+  nav{display:flex; gap:8px; flex-wrap:wrap}
+  nav button{
+    background:linear-gradient(180deg, #232633, #161823); color:#dfe6ee; border:1px solid #2a2f3e;
+    padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; letter-spacing:.2px;
+    transition:transform .08s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  nav button:hover{transform:translateY(-1px)}
+  nav button.active{border-color:var(--accent); box-shadow:0 0 0 2px rgb(124 92 255 / .25) inset}
+  .wrap{width:100%; max-width:1100px; background:linear-gradient(180deg, #141722, #0d0f16); border:1px solid #272c3a; border-radius:16px; padding:16px}
+  .grid{display:grid; grid-template-columns:1fr; gap:16px}
+  @media(min-width:980px){ .grid{grid-template-columns:1fr 1fr} }
+  section.game{display:none}
+  section.game.active{display:block}
+  .card{
+    background:linear-gradient(180deg, #171a26, #11131b); border:1px solid #262b38; border-radius:14px; padding:14px;
+    box-shadow: 0 10px 25px -18px #000 inset, 0 10px 30px -24px #000;
+  }
+  .card h2{margin:0 0 10px; font-size:18px}
+  .meta{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:13px; margin-bottom:10px}
+  .hint{color:var(--muted); font-size:12px; margin-top:8px}
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+
+  /* Canvases */
+  canvas{display:block; width:100%; height:auto; background:#0a0b10; border:1px solid #2a3040; border-radius:10px}
+  .stage{max-width:520px; margin:auto}
+
+  /* Tic Tac Toe */
+  .ttt-board{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:min(420px, 92vw); margin:12px auto;
+  }
+  .ttt-cell{
+    aspect-ratio:1/1; border:1px solid #2a2f3d; border-radius:12px; background:#0d0f17;
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:clamp(28px, 8vw, 44px);
+    cursor:pointer; transition:background .15s ease, transform .06s ease, border-color .2s ease;
+  }
+  .ttt-cell:hover{background:#121522}
+  .ttt-cell:active{transform:translateY(1px)}
+  .ttt-cell.win{background:#0f2b18; border-color:#1f6f3c; color:#b6ffd0; box-shadow:0 0 0 2px rgb(34 197 94 / .25) inset}
+  .pill{
+    background:#0e1220; border:1px solid #283046; color:#dfe6ee; border-radius:999px; padding:8px 12px; font-size:12px; font-weight:700;
+  }
+  .accent{color:#c9c3ff}
+  .btn{
+    background:linear-gradient(180deg, #2a2f45, #1b1f2f); border:1px solid #3a415c; color:#e7ecf7; padding:9px 12px; border-radius:10px; cursor:pointer; font-weight:700;
+  }
+  .btn:disabled{opacity:.55; cursor:not-allowed}
+  .btn.danger{border-color:#883346; color:#ffdbe3}
+  .btn.success{border-color:#2b7a4b; color:#c5ffd8}
+  .select{
+    appearance:none; background:#101320; color:#e9eef7; border:1px solid #2a3144; border-radius:10px; padding:9px 12px;
+  }
+
+  /* Mobile controls for Invaders */
+  .pad{display:flex; justify-content:center; gap:10px; margin-top:10px}
+  .pad button{
+    width:64px; height:44px; border-radius:10px; border:1px solid #31364a; background:#121523; color:#e9eef7; font-weight:900; letter-spacing:.5px; cursor:pointer;
+  }
+  .score{font-variant-numeric:tabular-nums}
+</style>
 </head>
 <body>
-  <h1>5-in-1 Game Arcade</h1>
-  <div id="main-menu" class="visible">
-    <button onclick="showGame('tic-tac-toe')">Tic Tac Toe</button>
-    <button onclick="showGame('flappy')">Flappy Bird</button>
-    <button onclick="showGame('pong')">Pong</button>
-    <button onclick="showGame('2048')">2048</button>
-    <button onclick="showGame('space')">Space Shooter</button>
+  <header>
+    <div>
+      <h1>Mini Game Hub</h1>
+      <div class="sub">Four classics — all playable right here.</div>
+    </div>
+    <nav id="tabs">
+      <button data-target="ttt" class="active">Tic Tac Toe</button>
+      <button data-target="invaders">Space Invaders</button>
+      <button data-target="pong">Pong</button>
+      <button data-target="flappy">Flappy Bird</button>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <div class="grid">
+
+      <!-- Tic Tac Toe -->
+      <section class="game active" id="game-ttt">
+        <div class="card">
+          <h2>Tic Tac Toe</h2>
+          <div class="meta">
+            <span class="pill">X = You</span>
+            <span class="pill">O = CPU / Player 2</span>
+            <span id="ttt-status" class="accent">Your move.</span>
+          </div>
+          <div class="row" style="margin-bottom:6px">
+            <label>Mode:
+              <select id="ttt-mode" class="select">
+                <option value="cpu" selected>CPU (Unbeatable)</option>
+                <option value="pvp">2 Players</option>
+              </select>
+            </label>
+            <button id="ttt-reset" class="btn">Reset</button>
+          </div>
+          <div id="ttt-board" class="ttt-board" aria-label="Tic Tac Toe board"></div>
+          <div class="hint">Tip: In CPU mode, the computer plays optimally. Good luck!</div>
+        </div>
+      </section>
+
+      <!-- Space Invaders -->
+      <section class="game" id="game-invaders">
+        <div class="card">
+          <h2>Space Invaders</h2>
+          <div class="meta">
+            <span class="pill score" id="invaders-score">Score: 0000</span>
+            <span class="pill" id="invaders-level">Level 1</span>
+            <span class="pill" id="invaders-lives">Lives: 3</span>
+          </div>
+          <div class="stage">
+            <canvas id="invaders-canvas" width="520" height="620" aria-label="Space Invaders canvas"></canvas>
+          </div>
+          <div class="row">
+            <button id="invaders-start" class="btn success">Start</button>
+            <button id="invaders-reset" class="btn">Reset</button>
+          </div>
+          <div class="pad">
+            <button id="pad-left">◀</button>
+            <button id="pad-fire">FIRE</button>
+            <button id="pad-right">▶</button>
+          </div>
+          <div class="hint">Controls: ←/→ to move, Space to shoot. On mobile, use the buttons.</div>
+        </div>
+      </section>
+
+      <!-- Pong -->
+      <section class="game" id="game-pong">
+        <div class="card">
+          <h2>Pong</h2>
+          <div class="meta">
+            <span class="pill score" id="pong-score">You 0 : 0 CPU</span>
+            <span class="pill" id="pong-state">Click canvas to serve</span>
+          </div>
+          <div class="stage">
+            <canvas id="pong-canvas" width="520" height="360" aria-label="Pong canvas"></canvas>
+          </div>
+          <div class="hint">Controls: Move your paddle with your mouse or touch. First to 7 wins.</div>
+        </div>
+      </section>
+
+      <!-- Flappy Bird -->
+      <section class="game" id="game-flappy">
+        <div class="card">
+          <h2>Flappy Bird</h2>
+          <div class="meta">
+            <span class="pill score" id="flappy-score">Score: 0</span>
+            <span class="pill" id="flappy-state">Tap/Space to flap</span>
+          </div>
+          <div class="stage">
+            <canvas id="flappy-canvas" width="420" height="600" aria-label="Flappy Bird canvas"></canvas>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button id="flappy-reset" class="btn">Reset</button>
+          </div>
+          <div class="hint">Tip: Keep a steady rhythm. Tap or press Space anywhere on the page.</div>
+        </div>
+      </section>
+
+    </div>
   </div>
 
-  <div id="tic-tac-toe" class="menu game-container">
-    <h2>Tic Tac Toe</h2>
-    <canvas id="ttt-canvas" width="300" height="300"></canvas>
-    <br><button onclick="goHome()">Back</button>
-  </div>
+<script>
+/* ----------- utilities / tab switching ----------- */
+(() => {
+  const buttons = document.querySelectorAll('#tabs button');
+  const sections = {
+    ttt: document.getElementById('game-ttt'),
+    invaders: document.getElementById('game-invaders'),
+    pong: document.getElementById('game-pong'),
+    flappy: document.getElementById('game-flappy')
+  };
 
-  <div id="flappy" class="menu game-container">
-    <h2>Flappy Bird</h2>
-    <canvas id="flappy-canvas" width="320" height="480"></canvas>
-    <br><button onclick="goHome()">Back</button>
-  </div>
+  function show(target){
+    // activate button
+    buttons.forEach(b => b.classList.toggle('active', b.dataset.target === target));
+    // show section
+    Object.entries(sections).forEach(([key, el]) => el.classList.toggle('active', key === target));
+    // pause other games
+    if (target !== 'invaders') Invaders.stop();
+    if (target !== 'pong') Pong.stop();
+    if (target !== 'flappy') Flappy.stop();
+  }
+  buttons.forEach(b => b.addEventListener('click', () => show(b.dataset.target)));
+})();
 
-  <div id="pong" class="menu game-container">
-    <h2>Pong</h2>
-    <canvas id="pong-canvas" width="600" height="400"></canvas>
-    <br><button onclick="goHome()">Back</button>
-  </div>
+/* ======================= TIC TAC TOE ======================= */
+const TicTacToe = (() => {
+  const boardEl = document.getElementById('ttt-board');
+  const statusEl = document.getElementById('ttt-status');
+  const modeEl = document.getElementById('ttt-mode');
+  const resetBtn = document.getElementById('ttt-reset');
 
-  <div id="2048" class="menu game-container">
-    <h2>2048</h2>
-    <iframe srcdoc="<!DOCTYPE html><html><body><script src='https://gabrielecirulli.github.io/2048/js/game_manager.js'></script></body></html>" width="500" height="600"></iframe>
-    <br><button onclick="goHome()">Back</button>
-  </div>
+  let board = Array(9).fill(null);
+  let player = 'X'; // X always starts
+  let locked = false;
 
-  <div id="space" class="menu game-container">
-    <h2>Space Shooter</h2>
-    <canvas id="space-canvas" width="600" height="400"></canvas>
-    <br><button onclick="goHome()">Back</button>
-  </div>
+  function renderBoard(){
+    boardEl.innerHTML = '';
+    board.forEach((mark, i) => {
+      const cell = document.createElement('button');
+      cell.className = 'ttt-cell';
+      cell.setAttribute('aria-label', `Cell ${i+1}`);
+      cell.textContent = mark ? mark : '';
+      cell.addEventListener('click', () => onMove(i));
+      boardEl.appendChild(cell);
+    });
+  }
 
-  <script>
-    function showGame(id) {
-      document.querySelectorAll('.menu').forEach(el => el.classList.remove('visible'));
-      document.getElementById(id).classList.add('visible');
-      document.getElementById('main-menu').classList.remove('visible');
+  function emptyIndices(b){ return b.map((v,i)=>v?null:i).filter(v=>v!==null); }
+
+  function winner(b){
+    const lines = [
+      [0,1,2],[3,4,5],[6,7,8], // rows
+      [0,3,6],[1,4,7],[2,5,8], // cols
+      [0,4,8],[2,4,6]          // diag
+    ];
+    for (const [a,b,c] of lines){
+      if (board[a] && board[a]===board[b] && board[a]===board[c]) return {mark:board[a], line:[a,b,c]};
     }
-    function goHome() {
-      document.querySelectorAll('.menu').forEach(el => el.classList.remove('visible'));
-      document.getElementById('main-menu').classList.add('visible');
+    if (!b.includes(null)) return {mark:'draw', line:[]};
+    return null;
+  }
+
+  function setStatus(text){ statusEl.textContent = text; }
+
+  function onMove(i){
+    if (locked || board[i]) return;
+    board[i] = player;
+    updateUI();
+    const w = winner(board);
+    if (w){
+      endGame(w);
+    } else {
+      player = (player === 'X') ? 'O' : 'X';
+      if (modeEl.value === 'cpu' && player === 'O'){
+        setStatus('CPU thinking…');
+        locked = true;
+        setTimeout(cpuMove, 120);
+      } else {
+        setStatus(`${player === 'X' ? 'Your' : 'Player 2'} move.`);
+      }
+    }
+  }
+
+  function endGame(w){
+    locked = true;
+    const cells = [...boardEl.children];
+    if (w.mark === 'draw'){
+      setStatus('Draw! Reset to play again.');
+    } else {
+      setStatus(`${w.mark === 'X' ? 'You' : (modeEl.value === 'cpu' ? 'CPU' : 'Player '+(w.mark==='X'?1:2))} win!`);
+      w.line.forEach(idx => cells[idx].classList.add('win'));
+    }
+  }
+
+  function updateUI(){
+    [...boardEl.children].forEach((c, i) => c.textContent = board[i] ?? '');
+  }
+
+  function reset(){
+    board = Array(9).fill(null);
+    player = 'X';
+    locked = false;
+    renderBoard();
+    setStatus('Your move.');
+  }
+
+  // Minimax (unbeatable CPU as 'O')
+  function cpuMove(){
+    const best = minimax(board, 'O');
+    if (best.index !== undefined) board[best.index] = 'O';
+    updateUI();
+    const w = winner(board);
+    if (w){ endGame(w); return; }
+    player = 'X';
+    locked = false;
+    setStatus('Your move.');
+  }
+
+  function minimax(b, mark){
+    const win = winner(b);
+    if (win){
+      if (win.mark === 'O') return {score: +10};
+      if (win.mark === 'X') return {score: -10};
+      return {score: 0};
+    }
+    const moves = [];
+    for (const i of emptyIndices(b)){
+      const newB = b.slice();
+      newB[i] = mark;
+      const {score} = minimax(newB, mark === 'O' ? 'X' : 'O');
+      moves.push({index:i, score});
+    }
+    // choose best for current 'mark'
+    if (mark === 'O'){
+      let max = -Infinity, choice = null;
+      for (const m of moves){ if (m.score > max){ max = m.score; choice = m; } }
+      return choice || {score:0};
+    } else {
+      let min = +Infinity, choice = null;
+      for (const m of moves){ if (m.score < min){ min = m.score; choice = m; } }
+      return choice || {score:0};
+    }
+  }
+
+  modeEl.addEventListener('change', reset);
+  resetBtn.addEventListener('click', reset);
+
+  renderBoard();
+
+  return { reset };
+})();
+
+/* ======================= SPACE INVADERS ======================= */
+const Invaders = (() => {
+  const canvas = document.getElementById('invaders-canvas');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('invaders-score');
+  const levelEl = document.getElementById('invaders-level');
+  const livesEl = document.getElementById('invaders-lives');
+  const startBtn = document.getElementById('invaders-start');
+  const resetBtn = document.getElementById('invaders-reset');
+  const padL = document.getElementById('pad-left');
+  const padR = document.getElementById('pad-right');
+  const padF = document.getElementById('pad-fire');
+
+  let anim = null, last = 0;
+  let left=false, right=false, firing=false;
+
+  const W = canvas.width, H = canvas.height;
+  const player = { x: W/2, y: H-30, w: 46, h: 10, speed: 240, cooldown:0 };
+  let bullet = null;
+  let aliens = [];
+  let dir = 1, drop = 0, speed = 36;
+  let score = 0, level = 1, lives = 3;
+  let running = false;
+
+  function initAliens(rows=4, cols=8){
+    aliens = [];
+    const margin = 40, gapX = 48, gapY = 36;
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        aliens.push({
+          x: margin + c*gapX, y: margin + r*gapY,
+          w: 28, h: 18, alive: true
+        });
+      }
+    }
+  }
+
+  function start(){
+    if (running) return;
+    running = true;
+    if (aliens.length === 0) { initAliens(); }
+    last = performance.now();
+    anim = requestAnimationFrame(loop);
+  }
+
+  function stop(){
+    running = false;
+    if (anim) cancelAnimationFrame(anim);
+    anim = null;
+  }
+
+  function reset(){
+    stop();
+    score = 0; level = 1; lives = 3;
+    bullet = null;
+    dir = 1; drop = 0; speed = 36;
+    player.x = W/2;
+    initAliens();
+    updateHUD();
+    draw();
+  }
+
+  function updateHUD(){
+    scoreEl.textContent = `Score: ${String(score).padStart(4,'0')}`;
+    levelEl.textContent = `Level ${level}`;
+    livesEl.textContent = `Lives: ${lives}`;
+  }
+
+  function drawPlayer(){
+    ctx.fillStyle = '#89b4ff';
+    ctx.fillRect(player.x - player.w/2, player.y - player.h/2, player.w, player.h);
+    // small turret
+    ctx.fillRect(player.x - 4, player.y - player.h/2 - 8, 8, 8);
+  }
+  function drawAlien(a){
+    ctx.fillStyle = '#a4ffa4';
+    ctx.fillRect(a.x - a.w/2, a.y - a.h/2, a.w, a.h);
+  }
+  function drawBullet(){
+    if (!bullet) return;
+    ctx.fillStyle = '#ffd866';
+    ctx.fillRect(bullet.x-2, bullet.y-8, 4, 12);
+  }
+
+  function fire(){
+    if (!running) return;
+    if (!bullet && player.cooldown <= 0){
+      bullet = { x: player.x, y: player.y - 18, vy: -420 };
+      player.cooldown = 0.22;
+    }
+  }
+
+  function collide(ax, ay, aw, ah, bx, by, bw, bh){
+    return Math.abs(ax - bx) * 2 < (aw + bw) && Math.abs(ay - by) * 2 < (ah + bh);
+  }
+
+  function loop(t){
+    const dt = Math.min(0.033, (t - last)/1000); last = t;
+    // input
+    if (left) player.x -= player.speed * dt;
+    if (right) player.x += player.speed * dt;
+    player.x = Math.max(20, Math.min(W-20, player.x));
+    player.cooldown = Math.max(0, player.cooldown - dt);
+
+    // aliens movement
+    let minX = Infinity, maxX = -Infinity;
+    for (const a of aliens){
+      if(!a.alive) continue;
+      a.x += dir * speed * dt;
+      minX = Math.min(minX, a.x - a.w/2);
+      maxX = Math.max(maxX, a.x + a.w/2);
+    }
+    if (minX < 12 || maxX > W-12){
+      for (const a of aliens){ if(a.alive) a.y += 16; }
+      dir *= -1;
+      speed *= 1.06;
     }
 
-    // Placeholder: actual game logic for each canvas will go here (next step)
-  </script>
+    // bullet
+    if (bullet){
+      bullet.y += bullet.vy * dt;
+      if (bullet.y < -10) bullet = null;
+      // collisions
+      for (const a of aliens){
+        if(a.alive && collide(a.x,a.y,a.w,a.h, bullet?.x??0, bullet?.y??0, 4, 12)){
+          a.alive = false; bullet = null; score += 10; updateHUD(); break;
+        }
+      }
+    }
+
+    // lose check: alien reach base
+    for (const a of aliens){
+      if(a.alive && a.y + a.h/2 >= player.y - 8){
+        lives--; updateHUD();
+        // reset wave or game over
+        if (lives <= 0){
+          stop();
+          drawGameOver('Game Over — Reset to try again');
+        }else{
+          // reposition player & wave
+          player.x = W/2; bullet = null; dir = 1; speed = 36 * (1 + (level-1)*0.12);
+          initAliens(4,8);
+        }
+        break;
+      }
+    }
+
+    // next level if cleared
+    if (aliens.every(a => !a.alive)){
+      level++; speed = 36 * (1 + (level-1)*0.22); dir = (level % 2 ? 1 : -1);
+      initAliens(4 + Math.min(3, Math.floor(level/2)), 8);
+      updateHUD();
+    }
+
+    // draw
+    draw();
+
+    if (running) anim = requestAnimationFrame(loop);
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // starfield
+    ctx.fillStyle = '#0d1220';
+    ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = '#1b2340';
+    for(let i=0;i<60;i++){
+      const x = (i*83)%W, y = (i*131)%H;
+      ctx.fillRect(x, y, 2, 2);
+    }
+    aliens.forEach(a => { if(a.alive) drawAlien(a); });
+    drawPlayer();
+    drawBullet();
+  }
+
+  function drawGameOver(msg){
+    draw();
+    ctx.fillStyle = 'rgba(0,0,0,.6)';
+    ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 22px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(msg, W/2, H/2);
+  }
+
+  // events
+  window.addEventListener('keydown', e => {
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA') left = true;
+    if (e.code === 'ArrowRight' || e.code === 'KeyD') right = true;
+    if (e.code === 'Space'){ e.preventDefault(); firing = true; fire(); }
+  });
+  window.addEventListener('keyup', e => {
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA') left = false;
+    if (e.code === 'ArrowRight' || e.code === 'KeyD') right = false;
+    if (e.code === 'Space') firing = false;
+  });
+
+  function bindPad(btn, flag){
+    const down = () => { if(flag==='left') left=true; if(flag==='right') right=true; if(flag==='fire') fire(); };
+    const up = () => { if(flag==='left') left=false; if(flag==='right') right=false; };
+    btn.addEventListener('mousedown', down);
+    btn.addEventListener('touchstart', (e)=>{e.preventDefault(); down();},{passive:false});
+    btn.addEventListener('mouseup', up);
+    btn.addEventListener('mouseleave', up);
+    btn.addEventListener('touchend', up);
+  }
+  bindPad(padL, 'left');
+  bindPad(padR, 'right');
+  bindPad(padF, 'fire');
+
+  startBtn.addEventListener('click', () => start());
+  resetBtn.addEventListener('click', () => reset());
+
+  // initial state
+  reset(); // draw static
+  return { start, stop, reset };
+})();
+
+/* ======================= PONG ======================= */
+const Pong = (() => {
+  const canvas = document.getElementById('pong-canvas');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('pong-score');
+  const stateEl = document.getElementById('pong-state');
+  const W = canvas.width, H = canvas.height;
+
+  let anim=null, running=false, last=0;
+  const PADDLE_H = 70, PADDLE_W = 10;
+  const user = { x: 16, y: H/2 - PADDLE_H/2, vy: 0, speed: 420, score:0 };
+  const cpu  = { x: W-16-PADDLE_W, y: H/2 - PADDLE_H/2, vy: 0, speed: 360, score:0 };
+  const ball = { x: W/2, y: H/2, vx: 0, vy: 0, r: 6, speed: 320 };
+  let serveReady = true;
+
+  function serve(){
+    serveReady = false; stateEl.textContent = 'Playing…';
+    const dir = Math.random() < 0.5 ? -1 : 1;
+    ball.x = W/2; ball.y = H/2;
+    const angle = (Math.random()*Math.PI/3 - Math.PI/6); // -30..30 deg
+    ball.vx = dir * ball.speed * Math.cos(angle);
+    ball.vy = ball.speed * Math.sin(angle);
+  }
+
+  function stop(){ if(anim) cancelAnimationFrame(anim); anim=null; running=false; }
+  function start(){
+    if(running) return; running=true; last=performance.now();
+    anim = requestAnimationFrame(loop);
+  }
+
+  function reset(){
+    stop();
+    user.score=0; cpu.score=0;
+    user.y=H/2-PADDLE_H/2; cpu.y=H/2-PADDLE_H/2;
+    serveReady = true; ball.vx=ball.vy=0; ball.x=W/2; ball.y=H/2;
+    scoreEl.textContent = `You ${user.score} : ${cpu.score} CPU`;
+    stateEl.textContent = 'Click canvas to serve';
+    draw();
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#0c0f18'; ctx.fillRect(0,0,W,H);
+    // center line
+    ctx.fillStyle='#21283a';
+    for(let y=8;y<H;y+=16) ctx.fillRect(W/2-2, y, 4, 8);
+    // paddles
+    ctx.fillStyle='#b6c4ff';
+    ctx.fillRect(user.x, user.y, PADDLE_W, PADDLE_H);
+    ctx.fillStyle='#ffd8a8';
+    ctx.fillRect(cpu.x, cpu.y, PADDLE_W, PADDLE_H);
+    // ball
+    ctx.fillStyle='#c0ffd0';
+    ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fill();
+  }
+
+  function loop(t){
+    const dt = Math.min(0.033, (t-last)/1000); last = t;
+
+    // user follows mouse/touch (vy for smoothing)
+    user.y += user.vy * dt;
+    user.y = Math.max(0, Math.min(H-PADDLE_H, user.y));
+
+    // cpu follows ball with capped speed
+    const target = ball.y - PADDLE_H/2;
+    const diff = target - cpu.y;
+    const step = Math.max(-cpu.speed*dt, Math.min(cpu.speed*dt, diff));
+    cpu.y += step;
+    cpu.y = Math.max(0, Math.min(H-PADDLE_H, cpu.y));
+
+    // ball physics only if served
+    if (!serveReady){
+      ball.x += ball.vx * dt; ball.y += ball.vy * dt;
+
+      // top/bottom
+      if (ball.y-ball.r < 0 && ball.vy < 0){ ball.y = ball.r; ball.vy *= -1; }
+      if (ball.y+ball.r > H && ball.vy > 0){ ball.y = H-ball.r; ball.vy *= -1; }
+
+      // collide with paddles
+      // user
+      if (ball.x-ball.r < user.x+PADDLE_W && ball.y > user.y && ball.y < user.y+PADDLE_H && ball.vx < 0){
+        ball.x = user.x+PADDLE_W+ball.r;
+        const rel = (ball.y - (user.y+PADDLE_H/2)) / (PADDLE_H/2);
+        const ang = rel * (Math.PI/4);
+        const spd = Math.min(600, Math.hypot(ball.vx, ball.vy)*1.05 + 10);
+        ball.vx = Math.cos(ang) * spd;
+        ball.vy = Math.sin(ang) * spd;
+      }
+      // cpu
+      if (ball.x+ball.r > cpu.x && ball.y > cpu.y && ball.y < cpu.y+PADDLE_H && ball.vx > 0){
+        ball.x = cpu.x - ball.r;
+        const rel = (ball.y - (cpu.y+PADDLE_H/2)) / (PADDLE_H/2);
+        const ang = rel * (Math.PI/4);
+        const spd = Math.min(600, Math.hypot(ball.vx, ball.vy)*1.05 + 10);
+        ball.vx = -Math.cos(ang) * spd;
+        ball.vy = Math.sin(ang) * spd;
+      }
+
+      // score
+      if (ball.x < -20){ cpu.score++; scoreEl.textContent = `You ${user.score} : ${cpu.score} CPU`; roundOver(); }
+      if (ball.x > W+20){ user.score++; scoreEl.textContent = `You ${user.score} : ${cpu.score} CPU`; roundOver(); }
+    }
+
+    // win condition
+    if (user.score >= 7 || cpu.score >= 7){
+      stop();
+      stateEl.textContent = (user.score>cpu.score?'You win!':'CPU wins!') + ' Click to play again.';
+      serveReady = true; ball.vx=ball.vy=0; ball.x=W/2; ball.y=H/2;
+      draw();
+      return;
+    }
+
+    draw();
+    if (running) anim = requestAnimationFrame(loop);
+  }
+
+  function roundOver(){
+    serveReady = true;
+    stateEl.textContent = 'Click canvas to serve';
+    ball.vx=ball.vy=0; ball.x=W/2; ball.y=H/2;
+  }
+
+  // mouse/touch control
+  function setUserY(clientY){
+    const rect = canvas.getBoundingClientRect();
+    const y = clientY - rect.top - PADDLE_H/2;
+    user.y = Math.max(0, Math.min(H-PADDLE_H, y));
+  }
+  canvas.addEventListener('mousemove', e => setUserY(e.clientY));
+  canvas.addEventListener('touchmove', e => { e.preventDefault(); setUserY(e.touches[0].clientY); }, {passive:false});
+  canvas.addEventListener('click', () => { if (serveReady){ serve(); if(!running) start(); } });
+
+  reset();
+  return { start, stop, reset };
+})();
+
+/* ======================= FLAPPY BIRD ======================= */
+const Flappy = (() => {
+  const canvas = document.getElementById('flappy-canvas');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('flappy-score');
+  const stateEl = document.getElementById('flappy-state');
+  const resetBtn = document.getElementById('flappy-reset');
+  const W = canvas.width, H = canvas.height;
+
+  let anim=null, running=false, last=0;
+  const bird = { x: 110, y: H/2, vy: 0, r: 12 };
+  const G = 980; // px/s^2
+  const flapV = -300;
+  let pipes = [];
+  let spawn = 0;
+  let score = 0;
+  let dead = false;
+
+  function reset(){
+    stop();
+    bird.y=H/2; bird.vy=0;
+    pipes=[]; spawn=0; score=0; dead=false;
+    scoreEl.textContent = 'Score: 0';
+    stateEl.textContent = 'Tap/Space to flap';
+    draw(true);
+  }
+  function start(){ if(running) return; running=true; last=performance.now(); anim=requestAnimationFrame(loop); }
+  function stop(){ if(anim) cancelAnimationFrame(anim); anim=null; running=false; }
+
+  function flap(){
+    if (dead){ reset(); start(); return; }
+    bird.vy = flapV;
+    if (!running) start();
+  }
+
+  function loop(t){
+    const dt = Math.min(0.033, (t-last)/1000); last=t;
+
+    // physics
+    bird.vy += G*dt;
+    bird.y += bird.vy*dt;
+
+    // spawn pipes
+    spawn -= dt;
+    if (spawn <= 0){
+      spawn = 1.35;
+      const gap = 148;
+      const minTop = 60, maxTop = H - gap - 60;
+      const top = Math.random()*(maxTop-minTop)+minTop;
+      pipes.push({ x: W+40, y:0, w:56, h:top });
+      pipes.push({ x: W+40, y:top+gap, w:56, h:H-(top+gap) });
+    }
+
+    // move pipes & scoring
+    for (const p of pipes) p.x -= 160*dt;
+    // remove offscreen
+    pipes = pipes.filter(p => p.x + p.w > -60);
+
+    // score when passing middle of each pair (check top pipes only)
+    for (let i=0;i<pipes.length;i+=2){
+      const pairX = pipes[i].x + pipes[i].w;
+      if (!pipes[i].scored && pairX < bird.x - bird.r){
+        pipes[i].scored = true;
+        score++; scoreEl.textContent = `Score: ${score}`;
+      }
+    }
+
+    // collisions
+    if (bird.y - bird.r < 0 || bird.y + bird.r > H) die();
+    for (const p of pipes){
+      if (circleRect(bird.x, bird.y, bird.r, p.x, p.y, p.w, p.h)) die();
+    }
+
+    draw();
+    if (running) anim=requestAnimationFrame(loop);
+  }
+
+  function die(){
+    dead = true; stop();
+    stateEl.textContent = 'Game Over — tap/space to restart';
+    draw(true);
+  }
+
+  function circleRect(cx,cy,cr, rx,ry,rw,rh){
+    const closestX = Math.max(rx, Math.min(cx, rx+rw));
+    const closestY = Math.max(ry, Math.min(cy, ry+rh));
+    const dx = cx - closestX, dy = cy - closestY;
+    return dx*dx + dy*dy < cr*cr;
+  }
+
+  function draw(paused=false){
+    // background
+    ctx.fillStyle='#05101f'; ctx.fillRect(0,0,W,H);
+    // ground gradient
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0, '#081a33'); g.addColorStop(1, '#0a1324');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+    // pipes
+    for (const p of pipes){
+      ctx.fillStyle='#83ffb3';
+      ctx.fillRect(p.x, p.y, p.w, p.h);
+      ctx.fillStyle='#40d483';
+      ctx.fillRect(p.x, p.y + p.h - 10, p.w, 10);
+    }
+
+    // bird
+    ctx.fillStyle='#ffd86b';
+    ctx.beginPath(); ctx.arc(bird.x, bird.y, bird.r, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#00000055';
+    ctx.beginPath(); ctx.arc(bird.x+4, bird.y-4, 3, 0, Math.PI*2); ctx.fill();
+
+    if (paused){
+      ctx.fillStyle='rgba(0,0,0,.45)';
+      ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#ffffff';
+      ctx.font='bold 20px system-ui';
+      ctx.textAlign='center';
+      ctx.fillText('Tap / Space to flap', W/2, H/2);
+    }
+  }
+
+  // input
+  window.addEventListener('keydown', e => { if(e.code==='Space'){ e.preventDefault(); flap(); }});
+  canvas.addEventListener('click', flap);
+  window.addEventListener('touchstart', flap);
+
+  resetBtn.addEventListener('click', reset);
+
+  reset(); // draw static
+  return { start, stop, reset };
+})();
+</script>
 </body>
 </html>
