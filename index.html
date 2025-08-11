@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mini Game Hub — Admin, AI New Game, + Pong Invaders</title>
+<title>Mini Game Hub — Admin, Backend, AI New Game</title>
 <style>
   :root{
     --bg:#0e0f13; --panel:#171922; --ink:#e8ecf1; --muted:#9aa3af; --accent:#7c5cff; --accent-2:#00d4ff; --danger:#ff4d6d; --win:#22c55e;
@@ -54,7 +54,7 @@
   /* Modal */
   .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.6); z-index:1000}
   .modal.open{display:flex}
-  .modal-card{width:min(720px, 96vw); background:var(--panel); border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:16px; box-shadow:0 20px 80px rgba(0,0,0,.6)}
+  .modal-card{width:min(980px, 96vw); background:var(--panel); border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:16px; box-shadow:0 20px 80px rgba(0,0,0,.6)}
   .modal-header{display:flex; align-items:center; justify-content:space-between}
   .modal-body{margin-top:10px}
   .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
@@ -62,8 +62,8 @@
   input[type="text"], input[type="password"], input[type="number"], select, textarea{
     background:#0b0d12; border:1px solid rgba(255,255,255,.16); color:var(--ink); border-radius:10px; padding:8px 10px; font-size:14px;
   }
-  textarea{min-height:120px}
-  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px}
+  textarea{min-height:120px; width:100%}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px}
   .switch{position:relative; display:inline-block; width:46px; height:26px}
   .switch input{display:none}
   .slider{position:absolute; cursor:pointer; top:0;left:0;right:0;bottom:0; background:#2a2d39; transition:.2s; border-radius:999px; border:1px solid rgba(255,255,255,.12)}
@@ -85,6 +85,7 @@
   </div>
   <div class="top-actions">
     <button class="btn" id="btnAdmin">Admin Stuff</button>
+    <button class="btn" id="btnBackend">Backend</button>
     <button class="btn" id="btnSettings">Settings</button>
     <button class="btn primary" id="btnSave">Save Progress</button>
     <button class="btn" id="btnLoad">Load</button>
@@ -113,7 +114,7 @@
     </div>
     <div id="gameArea" class="game-area">
       <div class="hud" id="hud"></div>
-      <!-- Canvases are injected here -->
+      <!-- Canvases/iframes are injected here -->
     </div>
   </main>
 </div>
@@ -129,7 +130,7 @@
     <div class="modal-body">
       <div id="adminGate">
         <div class="kvs">
-          <label>Enter Password (hint: 6767)</label>
+<label>Enter Password</label>
           <input type="password" id="adminPass" placeholder="••••" />
         </div>
         <div style="margin-top:8px" class="row">
@@ -209,6 +210,96 @@
   </div>
 </div>
 
+<!-- Backend Modal -->
+<div class="modal" id="backendModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Backend: Scripts & How-To</h3>
+      <button class="btn" id="closeBackend">✕</button>
+    </div>
+    <div class="modal-body grid" id="backendBody">
+      <!-- Tic Tac Toe -->
+      <div class="panel">
+        <h4>Tic Tac Toe</h4>
+        <div class="row">
+          <button class="btn" data-copy="tttHub">Copy Hub Script</button>
+          <button class="btn" data-copy="tttStandalone">Copy Standalone</button>
+          <button class="btn" data-download="tttStandalone" data-fn="tic-tac-toe.html">Download</button>
+        </div>
+        <div class="kvs"><label class="notice">Hub script (this page)</label><textarea id="tttHub" readonly></textarea></div>
+        <div class="kvs"><label class="notice">Standalone HTML</label><textarea id="tttStandalone" readonly></textarea></div>
+        <details><summary>How to turn it into a game</summary>
+          <ol>
+            <li>Click <span class="kbd">Copy Standalone</span>.</li>
+            <li>Save as <span class="kbd">tic-tac-toe.html</span>.</li>
+            <li>Open it in your browser. No libraries needed.</li>
+          </ol>
+        </details>
+      </div>
+
+      <!-- Space Invaders -->
+      <div class="panel">
+        <h4>Space Invaders</h4>
+        <div class="row">
+          <button class="btn" data-copy="invadersHub">Copy Hub Script</button>
+          <button class="btn" data-copy="invadersStandalone">Copy Standalone</button>
+          <button class="btn" data-download="invadersStandalone" data-fn="space-invaders.html">Download</button>
+        </div>
+        <div class="kvs"><label class="notice">Hub script (this page)</label><textarea id="invadersHub" readonly></textarea></div>
+        <div class="kvs"><label class="notice">Standalone HTML</label><textarea id="invadersStandalone" readonly></textarea></div>
+        <details><summary>How to turn it into a game</summary>
+          <ol><li>Copy the standalone code → save as <span class="kbd">space-invaders.html</span>.</li><li>Open in browser.</li></ol>
+        </details>
+      </div>
+
+      <!-- Pong -->
+      <div class="panel">
+        <h4>Pong (AI can lose)</h4>
+        <div class="row">
+          <button class="btn" data-copy="pongHub">Copy Hub Script</button>
+          <button class="btn" data-copy="pongStandalone">Copy Standalone</button>
+          <button class="btn" data-download="pongStandalone" data-fn="pong.html">Download</button>
+        </div>
+        <div class="kvs"><label class="notice">Hub script (this page)</label><textarea id="pongHub" readonly></textarea></div>
+        <div class="kvs"><label class="notice">Standalone HTML</label><textarea id="pongStandalone" readonly></textarea></div>
+        <details><summary>How to turn it into a game</summary>
+          <ol><li>Copy the standalone code → save as <span class="kbd">pong.html</span>.</li><li>Open in browser.</li></ol>
+        </details>
+      </div>
+
+      <!-- Flappy Bird -->
+      <div class="panel">
+        <h4>Flappy Bird</h4>
+        <div class="row">
+          <button class="btn" data-copy="flappyHub">Copy Hub Script</button>
+          <button class="btn" data-copy="flappyStandalone">Copy Standalone</button>
+          <button class="btn" data-download="flappyStandalone" data-fn="flappy.html">Download</button>
+        </div>
+        <div class="kvs"><label class="notice">Hub script (this page)</label><textarea id="flappyHub" readonly></textarea></div>
+        <div class="kvs"><label class="notice">Standalone HTML</label><textarea id="flappyStandalone" readonly></textarea></div>
+        <details><summary>How to turn it into a game</summary>
+          <ol><li>Copy the standalone code → save as <span class="kbd">flappy.html</span>.</li><li>Open in browser.</li></ol>
+        </details>
+      </div>
+
+      <!-- Pong Invaders -->
+      <div class="panel">
+        <h4>Pong Invaders</h4>
+        <div class="row">
+          <button class="btn" data-copy="piHub">Copy Hub Script</button>
+          <button class="btn" data-copy="piStandalone">Copy Standalone</button>
+          <button class="btn" data-download="piStandalone" data-fn="pong-invaders.html">Download</button>
+        </div>
+        <div class="kvs"><label class="notice">Hub script (this page)</label><textarea id="piHub" readonly></textarea></div>
+        <div class="kvs"><label class="notice">Standalone HTML</label><textarea id="piStandalone" readonly></textarea></div>
+        <details><summary>How to turn it into a game</summary>
+          <ol><li>Copy the standalone code → save as <span class="kbd">pong-invaders.html</span>.</li><li>Open in browser.</li></ol>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 /**************************************************************************
  * Put your OpenAI key here if you want (or use Settings modal):
@@ -252,7 +343,7 @@ function setHUD(tags){
 }
 
 function updateTopBars(name, score='0', lives='—'){
-  activeGameName.textContent=name; scoreTag.textContent=`Score: ${score}`; livesTag.textContent=`Lives: ${lives}`;
+  activeGameName.textContent=name; scoreTag.textContent=`${typeof score==='string'?'': 'Score: '}${score}`; livesTag.textContent=`Lives: ${lives}`;
 }
 
 function rand(min,max){return Math.random()*(max-min)+min}
@@ -394,9 +485,9 @@ addGame({
   start(){
     setHUD(['Click grid to play','You=✕, AI=○']); updateTopBars('Tic Tac Toe', 0, '—');
     const size=420; const c=makeCanvas(size,size); gameArea.appendChild(c); const ctx=c.getContext('2d');
-    let board=Array(9).fill(null); let you='X', ai='O', turn='X', paused=false;
+    let board=Array(9).fill(null); let you='X', ai='O', paused=false;
 
-    function winner(b){ const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    function winner(){ const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
       for(const [a,b1,c1] of lines){ if(board[a]&&board[a]===board[b1]&&board[a]===board[c1]) return board[a]; }
       return board.every(x=>x)?'D':null;
     }
@@ -407,13 +498,13 @@ addGame({
         if(board[i]==='X'){ ctx.strokeStyle='#7c5cff'; ctx.beginPath(); ctx.moveTo(cx-40,cy-40); ctx.lineTo(cx+40,cy+40); ctx.moveTo(cx+40,cy-40); ctx.lineTo(cx-40,cy+40); ctx.stroke(); }
         if(board[i]==='O'){ ctx.strokeStyle='#00d4ff'; ctx.beginPath(); ctx.arc(cx,cy,48,0,Math.PI*2); ctx.stroke(); }
       }
-      if(CHEATS.ttt.showHints && !winner(board)){
+      if(CHEATS.ttt.showHints && !winner()){
         ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=3;
         for(let i=0;i<9;i++){ if(!board[i]){ const x=i%3,y=(i/3|0); ctx.strokeRect(x*size/3+10,y*size/3+10,size/3-20,size/3-20); }}
       }
     }
 
-    function bestMove(){ // simple: win if can, block if needed, else random
+    function bestMove(){ // win, block, else random
       const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
       for(const L of lines){ const cells=L.map(i=>board[i]); if(cells.filter(v=>v===ai).length===2 && cells.includes(null)) return L[cells.indexOf(null)]; }
       for(const L of lines){ const cells=L.map(i=>board[i]); if(cells.filter(v=>v===you).length===2 && cells.includes(null)) return L[cells.indexOf(null)]; }
@@ -422,23 +513,22 @@ addGame({
 
     c.addEventListener('click', (e)=>{
       if(paused) return; const rect=c.getBoundingClientRect(); const x=e.clientX-rect.left, y=e.clientY-rect.top; const ix=(x/(size/3)|0)+(y/(size/3)|0)*3;
-      if(!board[ix] && !winner(board)){
+      if(!board[ix] && !winner()){
         board[ix]=you; beep(660,60);
-        if(CHEATS.ttt.autoWin){ // fill a winning line if possible
+        if(CHEATS.ttt.autoWin){
           const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
           for(const L of lines){ const cells=L.map(i=>board[i]); if(cells.filter(v=>v==='X').length===2 && cells.includes(null)){ board[L[cells.indexOf(null)]]='X'; break; } }
         }
-        if(!winner(board)){
-          turn='O'; const mv=bestMove(); if(mv!=null){ board[mv]=ai; }
-          turn='X';
+        if(!winner()){
+          const mv=bestMove(); if(mv!=null){ board[mv]=ai; }
         }
       }
-      draw(); const w=winner(board); if(w){
+      draw(); const w=winner(); if(w){
         setHUD([w==='D'? 'Draw!':'Winner: '+w,'Click to restart']);
       }
     });
 
-    function loop(){ if(!paused) draw(); requestAnimationFrame(loop); }
+    function loop(){ draw(); requestAnimationFrame(loop); }
     loop();
 
     return {
@@ -457,7 +547,7 @@ addGame({
     const c=makeCanvas(720,480); const ctx=c.getContext('2d'); gameArea.appendChild(c);
     let paused=false, score=0, lives=3;
     const ship={x:360,y:440,w:50,h:16, vx:0, speed:5, cd:0};
-    const bullets=[]; const enemies=[]; let dir=1, step=0; // marching
+    const bullets=[]; const enemies=[]; let dir=1, step=0;
     function spawn(){
       enemies.length=0; for(let r=0;r<4;r++){ for(let col=0;col<10;col++){ enemies.push({x:80+col*55, y:60+r*40, w:30,h:20, alive:true}); }}
     }
@@ -469,27 +559,20 @@ addGame({
     function shoot(){ if(ship.cd>0) return; bullets.push({x:ship.x,y:ship.y-10,v: -7}); ship.cd = CHEATS.invaders.rapid? 3: 12; beep(700,40); }
 
     function update(){ if(paused) return; ship.vx=(keys['ArrowLeft']?-ship.speed:0)+(keys['ArrowRight']?ship.speed:0); ship.x=Math.max(20, Math.min(700, ship.x+ship.vx)); ship.cd=Math.max(0, ship.cd-1);
-      // Enemies move
       step++; if(step%40===0){ let touchEdge=false; enemies.forEach(e=>{ e.x+=12*dir; if(e.x>680||e.x<20) touchEdge=true;}); if(touchEdge){ dir*=-1; enemies.forEach(e=>e.y+=16); }}
-      // bullets
       bullets.forEach(b=>b.y+=b.v);
       for(const b of bullets){ for(const e of enemies){ if(e.alive && Math.abs(b.x-e.x)<20 && Math.abs(b.y-e.y)<14){ e.alive=false; b.v=0; b.y=-99; score+=10; beep(900,50);} }}
-      // enemy fire
       if(Math.random()<0.02){ const alive=enemies.filter(e=>e.alive); if(alive.length){ const e=alive[Math.random()*alive.length|0]; bullets.push({x:e.x,y:e.y+12,v: CHEATS.invaders.rapid?3:4, enemy:true}); }}
-      // hits
       for(const b of bullets){ if(b.enemy && Math.abs(b.x-ship.x)<28 && Math.abs(b.y-ship.y)<12){ if(!CHEATS.invaders.invincible){ lives--; b.y=999; beep(200,100);} }}
-      // cleanup
       for(let i=bullets.length-1;i>=0;i--){ if(bullets[i].y<-20||bullets[i].y>500) bullets.splice(i,1); }
       if(!enemies.some(e=>e.alive)) spawn();
       if(lives<=0){ paused=true; setHUD(['Game Over — press R to restart']); }
       updateTopBars('Space Invaders', score, lives);
     }
 
-    function draw(){ ctx.clearRect(0,0,c.width,c.height); // ship
+    function draw(){ ctx.clearRect(0,0,c.width,c.height);
       ctx.fillStyle='#7c5cff'; ctx.fillRect(ship.x-25, ship.y-8, 50,16);
-      // enemies
       enemies.forEach(e=>{ if(e.alive){ ctx.fillStyle='#00d4ff'; ctx.fillRect(e.x-15,e.y-10,30,20); }});
-      // bullets
       bullets.forEach(b=>{ ctx.fillStyle=b.enemy?'#ffb199':'#e8ecf1'; ctx.fillRect(b.x-2,b.y-6,4,12); });
     }
 
@@ -501,41 +584,124 @@ addGame({
 });
 
 /**************************************************************************
- * Game: Pong (solo vs AI)
+ * Game: Pong (Player vs AI, first to 7, AI can lose)
  **************************************************************************/
 addGame({
   id:'pong', title:'Pong',
   start(){
     const c=makeCanvas(720,480); const ctx=c.getContext('2d'); gameArea.appendChild(c);
-    let paused=false, score=0, lives='∞';
+    let paused=false, playerScore=0, aiScore=0, target=7;
+
+    const trackFactor = GLOBAL.difficulty==='easy' ? 0.035 : GLOBAL.difficulty==='hard' ? 0.09 : 0.06;
+
     const left={x:20,y:220,w:12,h:CHEATS.pong.bigPaddle?140:100, vy:0};
     const right={x:688,y:220,w:12,h:100};
-    const ball={x:360,y:240,vx:4,vy:3,r:8};
-    const keys={}; document.addEventListener('keydown',e=>{keys[e.code]=true; if(e.code==='KeyP') currentGame.togglePause(); if(e.code==='KeyR') currentGame.restart();});
+    const ball={x:360,y:240,vx:0,vy:0,r:8, inPlay:false};
+    const keys={};
+
+    function serve(to='ai'){
+      ball.inPlay=false;
+      ball.x = to==='ai' ? left.x+left.w+12 : right.x-12;
+      ball.y = (Math.random()*360+60)|0;
+      setTimeout(()=>{
+        const speed = CHEATS.pong.slowBall?4.5:6;
+        const angle = (Math.random()*0.6 - 0.3);
+        ball.vx = (to==='ai' ? speed : -speed);
+        ball.vy = speed * angle;
+        ball.inPlay=true;
+      }, 350);
+    }
+
+    function resetMatch(){ playerScore=0; aiScore=0; serve('ai'); }
+    function clamp(v,min,max){return v<min?min:v>max?max:v;}
+    function center(p){ return p.y + p.h/2; }
+
+    document.addEventListener('keydown',e=>{
+      keys[e.code]=true;
+      if(e.code==='KeyP') currentGame.togglePause();
+      if(e.code==='KeyR') currentGame.restart();
+    });
     document.addEventListener('keyup',e=>keys[e.code]=false);
-    function resetBall(){ ball.x=360; ball.y=240; const s=4; ball.vx= (Math.random()<.5?-s:s); ball.vy=(Math.random()*.5+.5)*(Math.random()<.5?-s:s); }
 
-    function update(){ if(paused) return; left.vy=(keys['ArrowUp']?-6:0)+(keys['ArrowDown']?6:0); left.y=Math.max(10,Math.min(470-left.h,left.y+left.vy));
-      // simple AI
-      right.y += (ball.y - (right.y+right.h/2))*0.06;
-      if(CHEATS.pong.slowBall){ ball.x+=ball.vx*0.6; ball.y+=ball.vy*0.6;} else { ball.x+=ball.vx; ball.y+=ball.vy; }
-      if(ball.y<10||ball.y>470) { ball.vy*=-1; beep(700,30);} // walls
-      // paddle collisions
-      function hit(p){ return ball.x-ball.r<p.x+p.w && ball.x+ball.r>p.x && ball.y>p.y && ball.y<p.y+p.h; }
-      if(hit(left)){ ball.vx=Math.abs(ball.vx); score+=1; beep(900,40); }
-      if(hit(right)){ ball.vx=-Math.abs(ball.vx); beep(600,40); }
-      if(ball.x<-20||ball.x>740) resetBall();
-      updateTopBars('Pong', score, lives);
+    function update(){
+      if(paused) return;
+      left.h = CHEATS.pong.bigPaddle ? 140 : 100;
+
+      const speed = 7;
+      left.vy = (keys['ArrowUp']?-speed:0) + (keys['ArrowDown']?speed:0);
+      left.y = clamp(left.y + left.vy, 10, 470-left.h);
+
+      const targetY = ball.inPlay ? ball.y : 240;
+      const aiCenter = center(right);
+      right.y += (targetY - aiCenter) * trackFactor;
+      right.y = clamp(right.y, 10, 470-right.h);
+
+      if(ball.inPlay){
+        const slow = CHEATS.pong.slowBall ? 0.75 : 1;
+        ball.x += ball.vx*slow; ball.y += ball.vy*slow;
+
+        if(ball.y < 10){ ball.y=10; ball.vy*=-1; beep(700,30); }
+        if(ball.y > 470){ ball.y=470; ball.vy*=-1; beep(700,30); }
+
+        function hit(p){
+          return ball.x-ball.r < p.x+p.w && ball.x+ball.r > p.x && ball.y > p.y && ball.y < p.y+p.h;
+        }
+
+        if(ball.vx<0 && hit(left)){
+          ball.x = left.x + left.w + ball.r + 0.1;
+          ball.vx = Math.abs(ball.vx) + 0.12;
+          const off = (ball.y - center(left)) / (left.h/2);
+          ball.vy = (CHEATS.pong.slowBall?5:6) * off;
+          beep(950,40);
+        }
+
+        if(ball.vx>0 && hit(right)){
+          ball.x = right.x - ball.r - 0.1;
+          ball.vx = -Math.abs(ball.vx) - 0.12;
+          const off = (ball.y - center(right)) / (right.h/2);
+          ball.vy = (CHEATS.pong.slowBall?5:6) * off;
+          beep(650,40);
+        }
+
+        if(ball.x < -20){ // AI scores
+          aiScore++; beep(250,160);
+          if(aiScore>=target){ endRound('AI Wins'); return; }
+          serve('player');
+        }
+        if(ball.x > 740){ // Player scores
+          playerScore++; beep(1100,140);
+          if(playerScore>=target){ endRound('You Win'); return; }
+          serve('ai');
+        }
+      }
+
+      updateTopBars('Pong', `You ${playerScore} — AI ${aiScore}`, `First to ${target}`);
     }
 
-    function draw(){ ctx.clearRect(0,0,c.width,c.height); ctx.fillStyle='#e8ecf1';
-      ctx.fillRect(left.x,left.y,left.w,left.h); ctx.fillRect(right.x,right.y,right.w,right.h); ctx.beginPath(); ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); ctx.fill();
+    function endRound(msg){
+      setHUD([msg,'Press R to restart']);
+      paused=true;
     }
 
-    resetBall(); setHUD(['Up/Down to move']);
-    function loop(){ update(); draw(); if(GLOBAL.showFPS){ showFPS(ctx,c);} requestAnimationFrame(loop); } loop();
+    function draw(){
+      ctx.clearRect(0,0,c.width,c.height);
+      ctx.fillStyle='#e8ecf1';
+      for(let y=0;y<c.height;y+=18){ ctx.fillRect(c.width/2-2,y,4,10); }
+      ctx.fillRect(left.x,left.y,left.w,left.h);
+      ctx.fillRect(right.x,right.y,right.w,right.h);
+      ctx.beginPath(); ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); ctx.fill();
+    }
 
-    return { restart(){ score=0; resetBall(); }, togglePause(){ paused=!paused; } };
+    function loop(){ update(); draw(); if(GLOBAL.showFPS){ showFPS(ctx,c);} requestAnimationFrame(loop); }
+
+    setHUD(['Up/Down to move • P pause • R restart']);
+    updateTopBars('Pong', `You 0 — AI 0`, `First to ${target}`);
+    serve('ai'); loop();
+
+    return {
+      restart(){ paused=false; resetMatch(); },
+      togglePause(){ paused = !paused; }
+    };
   }
 });
 
@@ -556,18 +722,16 @@ addGame({
     function update(){ if(paused) return; t++; if(t%90===0) spawn();
       bird.vy += 0.35; bird.y+=bird.vy; pipes.forEach(p=>p.x -= CHEATS.flappy.slow?2:3);
       pipes = pipes.filter(p=>p.x>-60);
-      // collisions
       if(!CHEATS.flappy.ghost){
         for(const p of pipes){ if(bird.x>p.x-30 && bird.x<p.x+30){ if(bird.y<p.top-20 || bird.y>p.top+p.gap+20){ lives=0; paused=true; setHUD(['Game Over — press R to restart']); break; } }
         }
       }
       if(bird.y>480||bird.y<0){ lives=0; paused=true; }
-      // scoring
       for(const p of pipes){ if(!p.passed && bird.x>p.x+30){ p.passed=true; score++; beep(1000,60);} }
       updateTopBars('Flappy Bird', score, lives);
     }
 
-    function draw(){ ctx.clearRect(0,0,c.width,c.height); // bird
+    function draw(){ ctx.clearRect(0,0,c.width,c.height);
       ctx.fillStyle='#ffd166'; ctx.beginPath(); ctx.arc(bird.x,bird.y,12,0,Math.PI*2); ctx.fill();
       ctx.fillStyle='#7c5cff'; pipes.forEach(p=>{ ctx.fillRect(p.x-30,0,60,p.top-20); ctx.fillRect(p.x-30,p.top+p.gap+20,60,480-(p.top+p.gap+20));});
     }
@@ -597,12 +761,10 @@ addGame({
       if(ball.stuck){ ball.x=pad.x+pad.w/2; ball.y=pad.y-20; if(CHEATS.pongInvaders.sticky) { /* stays stuck until space */ } }
       else { ball.x+=ball.vx; ball.y+=ball.vy; }
       if(ball.x<10||ball.x>710) { ball.vx*=-1; beep(700,30);} if(ball.y<10){ ball.vy*=-1; beep(700,30);} if(ball.y>500){ lives--; resetBall(); }
-      // paddle
-      if(ball.x>pad.x && ball.x<pad.x+pad.w && ball.y>pad.y-10 && ball.y<pad.y+10 && ball.vy>0){ ball.vy*=-1; const off=(ball.x-(pad.x+pad.w/2))/ (pad.w/2); ball.vx = 5*off; if(CHEATS.pongInvaders.multiBall && Math.random()<0.3){ /* simple score bonus */ score+=2; }
+      if(ball.x>pad.x && ball.x<pad.x+pad.w && ball.y>pad.y-10 && ball.y<pad.y+10 && ball.vy>0){ ball.vy*=-1; const off=(ball.x-(pad.x+pad.w/2))/ (pad.w/2); ball.vx = 5*off; if(CHEATS.pongInvaders.multiBall && Math.random()<0.3){ score+=2; }
         beep(900,40);
       }
-      // blocks (moving horizontally like invaders)
-      const shift = Math.sin(performance.now()/800)*8; // slight sway
+      const shift = Math.sin(performance.now()/800)*8;
       for(const b of blocks){
         const bx=b.x+shift; if(ball.x>bx && ball.x<bx+b.w && ball.y>b.y && ball.y<b.y+b.h){
           b.hp--; score+=5; ball.vy*=-1; beep(1000,40);
@@ -672,6 +834,140 @@ function addAIGameTab(title, html){
 }
 
 /**************************************************************************
+ * Backend button + code export (hub scripts + standalone)
+ **************************************************************************/
+const btnBackend = document.getElementById('btnBackend');
+const backendModal = document.getElementById('backendModal');
+const closeBackend = document.getElementById('closeBackend');
+let backendPopulated = false;
+
+btnBackend.onclick = () => { backendModal.classList.add('open'); populateBackendOnce(); };
+closeBackend.onclick = () => backendModal.classList.remove('open');
+
+// Standalone single-file HTML for each game (compact but fully playable)
+const CODE_TTT_HTML = `<!doctype html><meta charset="utf-8"><title>Tic Tac Toe</title><style>body{margin:0;background:#0b0d12;color:#e8ecf1;display:flex;align-items:center;justify-content:center;height:100vh;font:16px system-ui}canvas{background:#06080e;border:1px solid #2b3040;border-radius:12px}</style><canvas id=c width=420 height=420></canvas><script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');let b=Array(9).fill(null),me='X',ai='O';
+function w(){const L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+ for(const [a,d,e] of L){if(b[a]&&b[a]===b[d]&&b[a]===b[e])return b[a]} return b.every(x=>x)?'D':null}
+function draw(){ctx.clearRect(0,0,420,420);ctx.strokeStyle='#3a3f55';ctx.lineWidth=6;
+ for(let i=1;i<3;i++){ctx.beginPath();ctx.moveTo(i*140,0);ctx.lineTo(i*140,420);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i*140);ctx.lineTo(420,i*140);ctx.stroke()}
+ ctx.lineWidth=10;for(let i=0;i<9;i++){const x=i%3,y=(i/3|0),cx=x*140+70,cy=y*140+70;
+  if(b[i]==='X'){ctx.strokeStyle='#7c5cff';ctx.beginPath();ctx.moveTo(cx-40,cy-40);ctx.lineTo(cx+40,cy+40);ctx.moveTo(cx+40,cy-40);ctx.lineTo(cx-40,cy+40);ctx.stroke()}
+  if(b[i]==='O'){ctx.strokeStyle='#00d4ff';ctx.beginPath();ctx.arc(cx,cy,48,0,7);ctx.stroke()}
+ }}function best(){const L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+ for(const q of L){const v=q.map(i=>b[i]);if(v.filter(x=>x===ai).length===2&&v.includes(null))return q[v.indexOf(null)]}
+ for(const q of L){const v=q.map(i=>b[i]);if(v.filter(x=>x===me).length===2&&v.includes(null))return q[v.indexOf(null)]}
+ return b.map((v,i)=>v?null:i).filter(v=>v!=null)[Math.random()*b.filter(v=>!v).length|0]}
+c.onclick=e=>{const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,i=(x/140|0)+(y/140|0)*3;
+ if(!b[i]&&!w()){b[i]=me; if(!w()){const mv=best(); if(mv!=null) b[mv]=ai;}} draw(); const ww=w(); if(ww){setTimeout(()=>{alert(ww==='D'?'Draw!':('Winner '+ww)); b=Array(9).fill(null); draw();},30)}}
+draw();<\/script>`;
+
+const CODE_INVADERS_HTML = `<!doctype html><meta charset="utf-8"><title>Space Invaders</title><style>body{margin:0;background:#0b0d12;display:flex;align-items:center;justify-content:center;height:100vh}canvas{background:#06080e;border:1px solid #2b3040;border-radius:12px}</style><canvas id=c width=720 height=480></canvas><script>
+const c=document.getElementById('c'),x=c.getContext('2d');let sc=0,lv=3,p=false,ship={x:360,y:440,w:50,h:16,cd:0},B=[],E=[],dir=1,st=0;
+function spawn(){E=[];for(let r=0;r<4;r++)for(let i=0;i<10;i++)E.push({x:80+i*55,y:60+r*40,a:1})} spawn();
+const k={};onkeydown=e=>{k[e.code]=1;if(e.code==='Space')shoot()};onkeyup=e=>k[e.code]=0;
+function shoot(){if(ship.cd>0)return;B.push({x:ship.x,y:ship.y-10,v:-7});ship.cd=12}
+function u(){if(p)return;ship.x=Math.max(20,Math.min(700,ship.x+((k.ArrowLeft?-5:0)+(k.ArrowRight?5:0))));ship.cd=Math.max(0,ship.cd-1);
+ st++; if(st%40===0){let edge=0;E.forEach(e=>{e.x+=12*dir;if(e.x>680||e.x<20)edge=1}); if(edge){dir*=-1;E.forEach(e=>e.y+=16)}}
+ B.forEach(b=>b.y+=b.v);
+ for(const b of B)for(const e of E){if(e.a&&Math.abs(b.x-e.x)<20&&Math.abs(b.y-e.y)<14){e.a=0;b.y=-99;sc+=10}}
+ if(Math.random()<.02){const alive=E.filter(e=>e.a); if(alive.length){const e=alive[Math.random()*alive.length|0];B.push({x:e.x,y:e.y+12,v:4,enemy:1})}}
+ for(const b of B) if(b.enemy&&Math.abs(b.x-ship.x)<28&&Math.abs(b.y-ship.y)<12){lv--;b.y=999}
+ B=B.filter(b=>b.y>-20&&b.y<500); if(!E.some(e=>e.a))spawn(); if(lv<=0)p=true}
+function d(){x.clearRect(0,0,720,480);x.fillStyle='#7c5cff';x.fillRect(ship.x-25,ship.y-8,50,16);
+ E.forEach(e=>{if(e.a){x.fillStyle='#00d4ff';x.fillRect(e.x-15,e.y-10,30,20)}}); B.forEach(b=>{x.fillStyle=b.enemy?'#ffb199':'#e8ecf1';x.fillRect(b.x-2,b.y-6,4,12)});
+ x.fillStyle='#e8ecf1';x.fillText('Score '+sc+'  Lives '+lv,10,20); if(p)x.fillText('Game Over - refresh to restart',260,240)}
+(function loop(){u();d();requestAnimationFrame(loop)})();<\/script>`;
+
+const CODE_PONG_HTML = `<!doctype html><meta charset="utf-8"><title>Pong — Player vs AI</title><style>body{margin:0;background:#0b0d12;display:flex;align-items:center;justify-content:center;height:100vh}canvas{background:#06080e;border:1px solid #2b3040;border-radius:12px}</style><canvas id=c width=720 height=480></canvas><script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');const L={x:20,y:220,w:12,h:100},R={x:688,y:220,w:12,h:100},ball={x:360,y:240,vx:0,vy:0,r:8,inPlay:false};
+let ps=0,as=0,target=7,paused=false;const k={};onkeydown=e=>{k[e.code]=1;if(e.code==='KeyP')paused=!paused;if(e.code==='KeyR')rst()};onkeyup=e=>k[e.code]=0;
+function clamp(v,a,b){return v<a?a:v>b?b:v}function ctr(p){return p.y+p.h/2}
+function serve(to='ai'){ball.inPlay=false;ball.x=to==='ai'?L.x+L.w+12:R.x-12;ball.y=(Math.random()*360+60)|0;setTimeout(()=>{const s=6,a=(Math.random()*0.6-0.3);ball.vx=(to==='ai'?s:-s);ball.vy=s*a;ball.inPlay=true},350)}
+function rst(){ps=0;as=0;serve('ai');paused=false}
+function upd(){if(paused)return;L.y=clamp(L.y+((k.ArrowUp?-7:0)+(k.ArrowDown?7:0)),10,470-L.h);R.y+=((ball.inPlay?ball.y:240)-ctr(R))*0.06;R.y=clamp(R.y,10,470-R.h);
+ if(ball.inPlay){ball.x+=ball.vx;ball.y+=ball.vy;if(ball.y<10){ball.y=10;ball.vy*=-1}if(ball.y>470){ball.y=470;ball.vy*=-1}
+  function hit(p){return ball.x-ball.r<p.x+p.w&&ball.x+ball.r>p.x&&ball.y>p.y&&ball.y<p.y+p.h}
+  if(ball.vx<0&&hit(L)){ball.x=L.x+L.w+ball.r+0.1;ball.vx=Math.abs(ball.vx)+0.12;ball.vy=6*((ball.y-ctr(L))/(L.h/2))}
+  if(ball.vx>0&&hit(R)){ball.x=R.x-ball.r-0.1;ball.vx=-Math.abs(ball.vx)-0.12;ball.vy=6*((ball.y-ctr(R))/(R.h/2))}
+  if(ball.x<-20){as++;if(as>=target){end('AI Wins');return}serve('player')}
+  if(ball.x>740){ps++;if(ps>=target){end('You Win');return}serve('ai')}}}
+function end(msg){paused=true;setTimeout(()=>{if(confirm(msg+' — play again?'))rst()},60)}
+function draw(){ctx.clearRect(0,0,720,480);ctx.fillStyle='#e8ecf1';for(let y=0;y<480;y+=18){ctx.fillRect(358,y,4,10)}ctx.fillRect(L.x,L.y,L.w,L.h);ctx.fillRect(R.x,R.y,R.w,R.h);ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();ctx.fillText('You '+ps+' — AI '+as,10,20);ctx.fillText('First to '+target,620,20)}
+(function loop(){upd();draw();requestAnimationFrame(loop)})();serve('ai');<\/script>`;
+
+const CODE_FLAPPY_HTML = `<!doctype html><meta charset="utf-8"><title>Flappy</title><style>body{margin:0;background:#0b0d12;display:flex;align-items:center;justify-content:center;height:100vh}canvas{background:#06080e;border:1px solid #2b3040;border-radius:12px}</style><canvas id=c width=640 height=480></canvas><script>
+const c=document.getElementById('c'),x=c.getContext('2d');let sc=0,b={x:120,y:240,vy:0},P=[],t=0,over=false;
+function flap(){b.vy=-6} onkeydown=e=>{if(e.code==='Space')flap()}; c.onmousedown=flap;
+function spawn(){const g=140,top=60+Math.random()*240;P.push({x:700,top, gap:g})}
+function u(){if(over)return; t++; if(t%90===0)spawn(); b.vy+=.35;b.y+=b.vy; P.forEach(p=>p.x-=3); P=P.filter(p=>p.x>-60);
+ for(const p of P){ if(b.x>p.x-30&&b.x<p.x+30&&(b.y<p.top-20||b.y>p.top+p.gap+20)) over=true; if(!p.passed&&b.x>p.x+30){p.passed=1;sc++} }
+ if(b.y>480||b.y<0) over=true}
+function d(){x.clearRect(0,0,640,480);x.fillStyle='#ffd166';x.beginPath();x.arc(b.x,b.y,12,0,7);x.fill();
+ x.fillStyle='#7c5cff';P.forEach(p=>{x.fillRect(p.x-30,0,60,p.top-20);x.fillRect(p.x-30,p.top+p.gap+20,60,480-(p.top+p.gap+20))});
+ x.fillStyle='#e8ecf1';x.fillText('Score '+sc,10,20); if(over)x.fillText('Game Over - refresh to restart',200,240)}
+(function loop(){u();d();requestAnimationFrame(loop)})();<\/script>`;
+
+const CODE_PI_HTML = `<!doctype html><meta charset="utf-8"><title>Pong Invaders</title><style>body{margin:0;background:#0b0d12;display:flex;align-items:center;justify-content:center;height:100vh}canvas{background:#06080e;border:1px solid #2b3040;border-radius:12px}</style><canvas id=c width=720 height=480></canvas><script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');let sc=0,lv=3;
+const pad={x:320,y:450,w:100,h:12},ball={x:360,y:300,vx:4,vy:-5,r:8,stuck:true};
+const rows=5,cols=11,blocks=[];for(let r=0;r<rows;r++)for(let i=0;i<cols;i++)blocks.push({x:50+i*56,y:60+r*30,w:48,h:16,hp:(r%2?1:2)});
+const K={};onkeydown=e=>{K[e.code]=1;if(e.code==='Space'&&ball.stuck){ball.stuck=false;ball.vx=(Math.random()<.5?-4:4);ball.vy=-5}};onkeyup=e=>K[e.code]=0;
+function reset(){ball.x=pad.x+pad.w/2;ball.y=pad.y-20;ball.stuck=true}
+function upd(){pad.x=Math.max(10,Math.min(610,pad.x+((K.ArrowLeft?-7:0)+(K.ArrowRight?7:0))));
+ if(ball.stuck){ball.x=pad.x+pad.w/2;ball.y=pad.y-20}else{ball.x+=ball.vx;ball.y+=ball.vy}
+ if(ball.x<10||ball.x>710)ball.vx*=-1; if(ball.y<10)ball.vy*=-1; if(ball.y>500){lv--;reset()}
+ if(ball.x>pad.x&&ball.x<pad.x+pad.w&&ball.y>pad.y-10&&ball.y<pad.y+10&&ball.vy>0){ball.vy*=-1;const off=(ball.x-(pad.x+pad.w/2))/(pad.w/2);ball.vx=5*off}
+ const shift=Math.sin(performance.now()/800)*8;
+ for(const b of blocks){const bx=b.x+shift;if(ball.x>bx&&ball.x<bx+b.w&&ball.y>b.y&&ball.y<b.y+b.h){b.hp--;sc+=5;ball.vy*=-1}}
+ for(let i=blocks.length-1;i>=0;i--)if(blocks[i].hp<=0)blocks.splice(i,1)
+}
+function draw(){ctx.clearRect(0,0,720,480);ctx.fillStyle='#e8ecf1';ctx.fillRect(pad.x,pad.y,pad.w,pad.h);ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();
+ const shift=Math.sin(performance.now()/800)*8;blocks.forEach(b=>{ctx.fillStyle=b.hp>1?'#00d4ff':'#7c5cff';ctx.fillRect(b.x+shift,b.y,b.w,b.h)});
+ ctx.fillStyle='#e8ecf1';ctx.fillText('Score '+sc+'  Lives '+lv,10,20); if(lv<=0||blocks.length===0)ctx.fillText('Done! Refresh to restart',280,240)}
+(function loop(){upd();draw();requestAnimationFrame(loop)})();<\/script>`;
+
+// Fill code panes with hub start() source + standalone files
+function populateBackendOnce(){
+  if(backendPopulated) return;
+  const byId = id => document.getElementById(id);
+  const map = {
+    ttt:      {hub:'tttHub',       html:'tttStandalone',       code: CODE_TTT_HTML},
+    invaders: {hub:'invadersHub',  html:'invadersStandalone',  code: CODE_INVADERS_HTML},
+    pong:     {hub:'pongHub',      html:'pongStandalone',      code: CODE_PONG_HTML},
+    flappy:   {hub:'flappyHub',    html:'flappyStandalone',    code: CODE_FLAPPY_HTML},
+    pongInvaders:{hub:'piHub',     html:'piStandalone',        code: CODE_PI_HTML},
+  };
+  for(const g of GAMES){
+    if(map[g.id]){
+      byId(map[g.id].hub).value = (g.start && g.start.toString()) || 'Not available';
+      byId(map[g.id].html).value = map[g.id].code;
+    }
+  }
+  backendPopulated = true;
+}
+
+// Copy & Download handlers
+backendModal.addEventListener('click', (e)=>{
+  const copyId = e.target?.dataset?.copy;
+  if(copyId){
+    const ta = document.getElementById(copyId);
+    ta.focus(); ta.select();
+    document.execCommand('copy');
+    e.target.textContent = 'Copied!';
+    setTimeout(()=>e.target.textContent='Copy ' + (copyId.includes('Hub')?'Hub Script':'Standalone'), 800);
+  }
+  const dlId = e.target?.dataset?.download;
+  if(dlId){
+    const fn = e.target.dataset.fn || 'game.html';
+    const txt = document.getElementById(dlId).value;
+    const blob = new Blob([txt], {type:'text/html'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fn; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  }
+});
+
+/**************************************************************************
  * FPS helper
  **************************************************************************/
 let lastTime=performance.now(), frames=0, fps=0; function showFPS(ctx,c){ frames++; const now=performance.now(); if(now-lastTime>1000){ fps=frames; frames=0; lastTime=now; } ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillText('FPS '+fps, c.width-60, 20); }
@@ -680,7 +976,6 @@ let lastTime=performance.now(), frames=0, fps=0; function showFPS(ctx,c){ frames
  * Boot
  **************************************************************************/
 buildNav();
-// Default games list order already defined by addGame calls
 if(GAMES.length){ loadGame(0); }
 
 // Keyboard shortcuts for modals
