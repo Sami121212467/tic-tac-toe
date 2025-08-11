@@ -297,7 +297,7 @@
         </details>
       </div>
 
-      <!-- GitHub (new) -->
+      <!-- UPDATE MEMO (remember): GitHub panel must stay at the bottom of Backend -->
       <div class="panel" style="grid-column:1 / -1">
         <h4>GitHub</h4>
         <p>
@@ -329,11 +329,11 @@ const activeGameName = document.getElementById('activeGameName');
 let currentGame = null;
 let GLOBAL = {difficulty:'normal', sound:false, showFPS:false};
 let CHEATS = {
-  ttt:{autoWin:false, showHints:false},
-  invaders:{invincible:false, rapid:false},
-  pong:{bigPaddle:false, slowBall:false},
-  flappy:{ghost:false, slow:false},
-  pongInvaders:{sticky:false, multiBall:false}
+  ttt:         { autoWin:false, showHints:false },
+  invaders:    { invincible:false, rapid:false, autoWin:false },
+  pong:        { bigPaddle:false, slowBall:false, autoWin:false },
+  flappy:      { ghost:false, slow:false, autoWin:false },
+  pongInvaders:{ sticky:false, multiBall:false, autoWin:false }
 };
 
 function beep(freq=440, dur=80){
@@ -418,11 +418,11 @@ adminUnlock.onclick=()=>{
 function renderCheats(){
   cheatGrid.innerHTML='';
   const cards=[
-    {key:'ttt', name:'Tic Tac Toe', cheats:[['Auto-Win','autoWin'],['Show Hints','showHints']]},
-    {key:'invaders', name:'Space Invaders', cheats:[['Invincible','invincible'],['Rapid Fire','rapid']]},
-    {key:'pong', name:'Pong', cheats:[['Big Paddle','bigPaddle'],['Slow Ball','slowBall']]},
-    {key:'flappy', name:'Flappy Bird', cheats:[['Ghost (No Collide)','ghost'],['Slow Pipes','slow']]},
-    {key:'pongInvaders', name:'Pong Invaders', cheats:[['Sticky Paddle','sticky'],['Multi-Ball','multiBall']]},
+    {key:'ttt',          name:'Tic Tac Toe',    cheats:[['Auto-Win','autoWin'],['Show Hints','showHints']]},
+    {key:'invaders',     name:'Space Invaders', cheats:[['Invincible','invincible'],['Rapid Fire','rapid'],['Auto-Win','autoWin']]},
+    {key:'pong',         name:'Pong',           cheats:[['Big Paddle','bigPaddle'],['Slow Ball','slowBall'],['Auto-Win','autoWin']]},
+    {key:'flappy',       name:'Flappy Bird',    cheats:[['Ghost (No Collide)','ghost'],['Slow Pipes','slow'],['Auto-Win','autoWin']]},
+    {key:'pongInvaders', name:'Pong Invaders',  cheats:[['Sticky Paddle','sticky'],['Multi-Ball','multiBall'],['Auto-Win','autoWin']]},
   ];
   cards.forEach(c=>{
     const div=document.createElement('div'); div.className='panel';
@@ -569,13 +569,25 @@ addGame({
 
     function shoot(){ if(ship.cd>0) return; bullets.push({x:ship.x,y:ship.y-10,v: -7}); ship.cd = CHEATS.invaders.rapid? 3: 12; beep(700,40); }
 
-    function update(){ if(paused) return; ship.vx=(keys['ArrowLeft']?-ship.speed:0)+(keys['ArrowRight']?ship.speed:0); ship.x=Math.max(20, Math.min(700, ship.x+ship.vx)); ship.cd=Math.max(0, ship.cd-1);
+    function update(){
+      if(paused) return;
+
+      // Auto-Win cheat
+      if (CHEATS.invaders.autoWin) {
+        paused = true;
+        setHUD(['You Win — press R to restart']);
+        updateTopBars('Space Invaders', score, lives);
+        return;
+      }
+
+      ship.vx=(keys['ArrowLeft']?-ship.speed:0)+(keys['ArrowRight']?ship.speed:0); ship.x=Math.max(20, Math.min(700, ship.x+ship.vx)); ship.cd=Math.max(0, ship.cd-1);
       step++; if(step%40===0){ let touchEdge=false; enemies.forEach(e=>{ e.x+=12*dir; if(e.x>680||e.x<20) touchEdge=true;}); if(touchEdge){ dir*=-1; enemies.forEach(e=>e.y+=16); }}
       bullets.forEach(b=>b.y+=b.v);
       for(const b of bullets){ for(const e of enemies){ if(e.alive && Math.abs(b.x-e.x)<20 && Math.abs(b.y-e.y)<14){ e.alive=false; b.v=0; b.y=-99; score+=10; beep(900,50);} }}
       if(Math.random()<0.02){ const alive=enemies.filter(e=>e.alive); if(alive.length){ const e=alive[Math.random()*alive.length|0]; bullets.push({x:e.x,y:e.y+12,v: CHEATS.invaders.rapid?3:4, enemy:true}); }}
       for(const b of bullets){ if(b.enemy && Math.abs(b.x-ship.x)<28 && Math.abs(b.y-ship.y)<12){ if(!CHEATS.invaders.invincible){ lives--; b.y=999; beep(200,100);} }}
-      for(let i=bullets.length-1;i>=0;i--){ if(bullets[i].y<-20||bullets[i].y>500) bullets.splice(i,1); }
+      for(let i=bullets.length-1;i>=0;i--){ if(bullets[i].y<-20||b
+      ullets[i].y>500) bullets.splice(i,1); }
       if(!enemies.some(e=>e.alive)) spawn();
       if(lives<=0){ paused=true; setHUD(['Game Over — press R to restart']); }
       updateTopBars('Space Invaders', score, lives);
@@ -636,6 +648,13 @@ addGame({
 
     function update(){
       if(paused) return;
+
+      // Auto-Win cheat
+      if (CHEATS.pong.autoWin) {
+        endRound('You Win');
+        return;
+      }
+
       left.h = CHEATS.pong.bigPaddle ? 140 : 100;
 
       const speed = 7;
@@ -730,7 +749,18 @@ addGame({
 
     function spawn(){ const gap= CHEATS.flappy.slow? 180: 140; const top=rand(60,300); pipes.push({x:700,top:top, gap:gap}); }
 
-    function update(){ if(paused) return; t++; if(t%90===0) spawn();
+    function update(){
+      if(paused) return;
+
+      // Auto-Win cheat
+      if (CHEATS.flappy.autoWin) {
+        paused = true;
+        setHUD(['You Win — press R to restart']);
+        updateTopBars('Flappy Bird', score, lives);
+        return;
+      }
+
+      t++; if(t%90===0) spawn();
       bird.vy += 0.35; bird.y+=bird.vy; pipes.forEach(p=>p.x -= CHEATS.flappy.slow?2:3);
       pipes = pipes.filter(p=>p.x>-60);
       if(!CHEATS.flappy.ghost){
@@ -768,11 +798,19 @@ addGame({
     function resetBall(){ ball.x=pad.x+pad.w/2; ball.y=pad.y-20; ball.stuck=true; }
     resetBall();
 
-    function update(){ if(paused) return; const speed = 7; pad.x += ( (keys['ArrowLeft']?-speed:0) + (keys['ArrowRight']?speed:0)); pad.x=Math.max(10, Math.min(610, pad.x));
+    function update(){
+      if(paused) return;
+
+      // Auto-Win cheat: clear remaining blocks immediately
+      if (CHEATS.pongInvaders.autoWin && blocks.length) {
+        blocks.length = 0;
+      }
+
+      const speed = 7; pad.x += ( (keys['ArrowLeft']?-speed:0) + (keys['ArrowRight']?speed:0)); pad.x=Math.max(10, Math.min(610, pad.x));
       if(ball.stuck){ ball.x=pad.x+pad.w/2; ball.y=pad.y-20; if(CHEATS.pongInvaders.sticky) { /* stays stuck until space */ } }
       else { ball.x+=ball.vx; ball.y+=ball.vy; }
       if(ball.x<10||ball.x>710) { ball.vx*=-1; beep(700,30);} if(ball.y<10){ ball.vy*=-1; beep(700,30);} if(ball.y>500){ lives--; resetBall(); }
-      if(ball.x>pad.x && ball.x<pad.x+pad.w && ball.y>pad.y-10 && ball.y<pad.y+10 && ball.vy>0){ ball.vy*=-1; const off=(ball.x-(pad.x+pad.w/2))/ (pad.w/2); ball.vx = 5*off; if(CHEATS.pongInvaders.multiBall && Math.random()<0.3){ score+=2; }
+      if(ball.x>pad.x && ball.x<pad.x+pad.w && ball.y>pad.y-10 && ball.y<pad.y+10 && ball.vy>0){ ball.vy*=-1; const off=(ball.x-(pad.x+pad.w/2))/ (pad.w/2); ball.vx = 5*off;
         beep(900,40);
       }
       const shift = Math.sin(performance.now()/800)*8;
@@ -786,7 +824,8 @@ addGame({
       updateTopBars('Pong Invaders', score, lives);
     }
 
-    function draw(){ ctx.clearRect(0,0,c.width,c.height); ctx.fillStyle='#e8ecf1'; ctx.fillRect(pad.x,pad.y,pad.w,pad.h); ctx.beginPath(); ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); ctx.fill();
+    function draw(){ ctx.clearRect(0,0,c.width,c.height); ctx.fillStyle='#e8ecf1'; ctx.fillRect(pad.x,pad.y,pad.w,pad.h); ctx.beginPath(); ctx.arc(ball.x,b
+      all.y,ball.r,0,Math.PI*2); ctx.fill();
       const shift = Math.sin(performance.now()/800)*8; blocks.forEach(b=>{ ctx.fillStyle=b.hp>1?'#00d4ff':'#7c5cff'; ctx.fillRect(b.x+shift,b.y,b.w,b.h); });
     }
 
@@ -910,7 +949,7 @@ function draw(){ctx.clearRect(0,0,720,480);ctx.fillStyle='#e8ecf1';for(let y=0;y
 const CODE_FLAPPY_HTML = `<!doctype html><meta charset="utf-8"><title>Flappy</title><style>body{margin:0;background:#0b0d12;display:flex;align-items:center;justify-content:center;height:100vh}canvas{background:#06080e;border:1px solid #2b3040;border-radius:12px}</style><canvas id=c width=640 height=480></canvas><script>
 const c=document.getElementById('c'),x=c.getContext('2d');let sc=0,b={x:120,y:240,vy:0},P=[],t=0,over=false;
 function flap(){b.vy=-6} onkeydown=e=>{if(e.code==='Space')flap()}; c.onmousedown=flap;
-function spawn(){const g=140,top=60+Math.random()*240;P.push({x:700,top, gap:g})}
+function spawn(){const g=140,top=60+Math.random()*240;P.push({x:700,top, gap=g})}
 function u(){if(over)return; t++; if(t%90===0)spawn(); b.vy+=.35;b.y+=b.vy; P.forEach(p=>p.x-=3); P=P.filter(p=>p.x>-60);
  for(const p of P){ if(b.x>p.x-30&&b.x<p.x+30&&(b.y<p.top-20||b.y>p.top+p.gap+20)) over=true; if(!p.passed&&b.x>p.x+30){p.passed=1;sc++} }
  if(b.y>480||b.y<0) over=true}
@@ -918,25 +957,6 @@ function d(){x.clearRect(0,0,640,480);x.fillStyle='#ffd166';x.beginPath();x.arc(
  x.fillStyle='#7c5cff';P.forEach(p=>{x.fillRect(p.x-30,0,60,p.top-20);x.fillRect(p.x-30,p.top+p.gap+20,60,480-(p.top+p.gap+20))});
  x.fillStyle='#e8ecf1';x.fillText('Score '+sc,10,20); if(over)x.fillText('Game Over - refresh to restart',200,240)}
 (function loop(){u();d();requestAnimationFrame(loop)})();<\/script>`;
-
-const CODE_PI_HTML = `<!doctype html><meta charset="utf-8"><title>Pong Invaders</title><style>body{margin:0;background:#0b0d12;display:flex;align-items:center;justify-content:center;height:100vh}canvas{background:#06080e;border:1px solid #2b3040;border-radius:12px}</style><canvas id=c width=720 height=480></canvas><script>
-const c=document.getElementById('c'),ctx=c.getContext('2d');let sc=0,lv=3;
-const pad={x:320,y:450,w:100,h:12},ball={x:360,y:300,vx:4,vy:-5,r:8,stuck:true};
-const rows=5,cols=11,blocks=[];for(let r=0;r<rows;r++)for(let i=0;i<cols;i++)blocks.push({x:50+i*56,y:60+r*30,w:48,h:16,hp:(r%2?1:2)});
-const K={};onkeydown=e=>{K[e.code]=1;if(e.code==='Space'&&ball.stuck){ball.stuck=false;ball.vx=(Math.random()<.5?-4:4);ball.vy=-5}};onkeyup=e=>K[e.code]=0;
-function reset(){ball.x=pad.x+pad.w/2;ball.y=pad.y-20;ball.stuck=true}
-function upd(){pad.x=Math.max(10,Math.min(610,pad.x+((K.ArrowLeft?-7:0)+(K.ArrowRight?7:0))));
- if(ball.stuck){ball.x=pad.x+pad.w/2;ball.y=pad.y-20}else{ball.x+=ball.vx;ball.y+=ball.vy}
- if(ball.x<10||ball.x>710)ball.vx*=-1; if(ball.y<10)ball.vy*=-1; if(ball.y>500){lv--;reset()}
- if(ball.x>pad.x&&ball.x<pad.x+pad.w&&ball.y>pad.y-10&&ball.y<pad.y+10&&ball.vy>0){ball.vy*=-1;const off=(ball.x-(pad.x+pad.w/2))/(pad.w/2);ball.vx=5*off}
- const shift=Math.sin(performance.now()/800)*8;
- for(const b of blocks){const bx=b.x+shift;if(ball.x>bx&&ball.x<bx+b.w&&ball.y>b.y&&ball.y<b.y+b.h){b.hp--;sc+=5;ball.vy*=-1}}
- for(let i=blocks.length-1;i>=0;i--)if(blocks[i].hp<=0)blocks.splice(i,1)
-}
-function draw(){ctx.clearRect(0,0,720,480);ctx.fillStyle='#e8ecf1';ctx.fillRect(pad.x,pad.y,pad.w,pad.h);ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();
- const shift=Math.sin(performance.now()/800)*8;blocks.forEach(b=>{ctx.fillStyle=b.hp>1?'#00d4ff':'#7c5cff';ctx.fillRect(b.x+shift,b.y,b.w,b.h)});
- ctx.fillStyle='#e8ecf1';ctx.fillText('Score '+sc+'  Lives '+lv,10,20); if(lv<=0||blocks.length===0)ctx.fillText('Done! Refresh to restart',280,240)}
-(function loop(){upd();draw();requestAnimationFrame(loop)})();<\/script>`;
 
 // Fill code panes with hub start() source + standalone files
 function populateBackendOnce(){
