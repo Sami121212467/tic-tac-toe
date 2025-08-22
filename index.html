@@ -3,1016 +3,641 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mini Game Hub — Admin, Backend, AI New Game</title>
+<title>Samie — Mini Game Hub (Inside-Page)</title>
 <style>
   :root{
-    --bg:#0e0f13; --panel:#171922; --ink:#e8ecf1; --muted:#9aa3af; --accent:#7c5cff; --accent-2:#00d4ff; --danger:#ff4d6d; --win:#22c55e;
+    --bg:#0e0f13; --panel:#171922; --ink:#e8ecf1; --muted:#b7bec9; --accent:#6ae3ff; --accent2:#8b5cf6; --good:#22c55e; --bad:#ef4444;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{
-    margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans";
-    background: radial-gradient(1200px 700px at 80% -50%, #1b1f2b 0, #0e0f13 60%) no-repeat fixed;
-    color:var(--ink); display:flex; flex-direction:column; align-items:center; gap:16px; padding:16px;
-  }
-  header{
-    width:100%; max-width:1200px; display:flex; align-items:center; justify-content:space-between;
-    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
-    border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:12px 16px; backdrop-filter: blur(8px);
-  }
-  .brand{display:flex; align-items:center; gap:10px}
-  .brand .logo{width:40px; height:40px; border-radius:10px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow:0 6px 20px rgba(124,92,255,.35)}
-  .brand h1{margin:0; font-size:18px; letter-spacing:.3px}
-  .top-actions{display:flex; gap:8px; align-items:center}
-  .btn{
-    background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-    color:var(--ink); border:1px solid rgba(255,255,255,.12); padding:8px 12px; border-radius:12px; cursor:pointer;
-    transition:.2s transform,.2s box-shadow,.2s background-color; user-select:none; font-weight:600; font-size:14px;
-  }
-  .btn:hover{transform:translateY(-1px); box-shadow:0 6px 20px rgba(124,92,255,.25)}
-  .btn.primary{background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0b0d12; border:none}
-  .btn.danger{background:linear-gradient(135deg, #ff6b6b, #ffb199); color:#0b0d12; border:none}
-  .pill{padding:6px 10px; border-radius:999px; background:#0f121a; border:1px solid rgba(255,255,255,.08); color:var(--muted); font-size:12px}
-
-  .layout{width:100%; max-width:1200px; display:grid; grid-template-columns: 280px 1fr; gap:16px}
-  .panel{background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:12px}
-  nav .section-title{font-size:12px; letter-spacing:1.2px; color:var(--muted); margin:8px 8px 6px}
-  .navlist{display:flex; flex-direction:column; gap:6px}
-  .navitem{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; cursor:pointer; border:1px solid transparent}
-  .navitem:hover{background:rgba(255,255,255,.05)}
-  .navitem.active{background:linear-gradient(180deg, rgba(124,92,255,.18), rgba(0,212,255,.18)); border:1px solid rgba(255,255,255,.2)}
-  .navitem .dot{width:10px; height:10px; border-radius:50%; background:var(--muted)}
-  .navitem.active .dot{background:linear-gradient(135deg, var(--accent), var(--accent-2))}
-
-  .game-wrap{display:flex; flex-direction:column; gap:12px}
-  .game-toolbar{display:flex; align-items:center; justify-content:space-between}
-  .game-area{background:#0b0d12; border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:12px; min-height:520px; display:flex; align-items:center; justify-content:center; position:relative}
-  canvas{background:#06080e; border-radius:14px; border:1px solid rgba(255,255,255,.06)}
-  .hud{position:absolute; top:10px; left:10px; display:flex; gap:8px}
-  .tag{padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.06); color:#dfe7f4; font-size:12px; border:1px solid rgba(255,255,255,.1)}
-
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+  a{color:var(--accent)}
+  .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+  aside{background:var(--panel);padding:16px;display:flex;flex-direction:column;gap:12px;border-right:1px solid #232633}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+  .brand .dot{width:10px;height:10px;border-radius:999px;background:linear-gradient(135deg,var(--accent2),var(--accent));box-shadow:0 0 20px var(--accent)}
+  .btn{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#202431;border:1px solid #2a2f3d;border-radius:12px;color:var(--ink);cursor:pointer}
+  .btn:hover{border-color:#384155}
+  .btn.active{outline:2px solid var(--accent)}
+  .grow{flex:1}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #232633;background:linear-gradient(180deg,#12151d,#0e0f13)}
+  .main{min-height:0;display:flex;flex-direction:column}
+  .stage{padding:12px;min-height:0;overflow:auto}
+  .card{background:var(--panel);border:1px solid #232633;border-radius:16px;padding:12px}
+  .grid{display:grid;gap:12px}
+  .games{display:grid;grid-template-columns:1fr;gap:12px}
+  .hidden{display:none !important}
+  .game-wrap{display:flex;flex-direction:column;gap:12px}
+  canvas{background:#0b0d12;border:1px solid #22283a;border-radius:12px;width:100%;height:auto}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+  .pill{padding:6px 10px;border-radius:999px;border:1px solid #2a2f3d;background:#1a1f2c}
+  .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace;background:#0b0e15;border:1px solid #1f2331;padding:2px 6px;border-radius:6px}
+  /* Sudoku */
+  .sudoku{width:min(480px,95vw)}
+  .sudoku-grid{display:grid;grid-template-columns:repeat(9,1fr);border:2px solid #3a4156;border-radius:10px;overflow:hidden}
+  .sudoku-grid input{width:100%;aspect-ratio:1/1;text-align:center;font-size:18px;background:#0b0e15;color:var(--ink);border:1px solid #2a2f3d}
+  .sudoku-grid input:focus{outline:2px solid var(--accent)}
+  .sudoku-grid input[data-fixed="1"]{background:#111624;color:#9dc1ff}
+  .sudoku-controls{display:flex;gap:8px;margin-top:8px}
+  .notice{color:var(--muted)}
   /* Modal */
-  .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.6); z-index:1000}
-  .modal.open{display:flex}
-  .modal-card{width:min(980px, 96vw); background:var(--panel); border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:16px; box-shadow:0 20px 80px rgba(0,0,0,.6)}
-  .modal-header{display:flex; align-items:center; justify-content:space-between}
-  .modal-body{margin-top:10px}
-  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-  .kvs{display:grid; grid-template-columns: 180px 1fr; gap:8px; align-items:center}
-  input[type="text"], input[type="password"], input[type="number"], select, textarea{
-    background:#0b0d12; border:1px solid rgba(255,255,255,.16); color:var(--ink); border-radius:10px; padding:8px 10px; font-size:14px;
-  }
-  textarea{min-height:120px; width:100%}
-  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px}
-  .switch{position:relative; display:inline-block; width:46px; height:26px}
-  .switch input{display:none}
-  .slider{position:absolute; cursor:pointer; top:0;left:0;right:0;bottom:0; background:#2a2d39; transition:.2s; border-radius:999px; border:1px solid rgba(255,255,255,.12)}
-  .slider:before{position:absolute; content:""; height:20px; width:20px; left:3px; top:2px; background:white; border-radius:50%; transition:.2s}
-  input:checked + .slider{background:linear-gradient(90deg, var(--accent), var(--accent-2))}
-  input:checked + .slider:before{transform:translateX(20px)}
+  .modal-backdrop{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+  .modal{max-width:900px;width:100%;background:var(--panel);border:1px solid #2a2f3d;border-radius:16px;box-shadow:0 10px 40px #0009}
+  .modal header{border-bottom:1px solid #2a2f3d}
+  .modal .body{padding:16px}
+  .row{display:flex;gap:16px;flex-wrap:wrap}
+  .col{flex:1;min-width:260px}
+  .switch{display:flex;align-items:center;gap:10px}
+  .switch input{width:18px;height:18px}
+  .github-card{display:flex;gap:12px;align-items:center;border:1px dashed #334; padding:12px;border-radius:12px;margin-top:12px}
+  .muted{color:var(--muted)}
 
-  .notice{font-size:12px; color:var(--muted)}
-  .kbd{font-family:ui-monospace, Menlo, Consolas, monospace; background:#0b0d12; padding:2px 6px; border-radius:6px; border:1px solid rgba(255,255,255,.12)}
-  footer{opacity:.7; font-size:12px}
+  @media (max-width: 860px){
+    .app{grid-template-columns:1fr}
+    aside{position:sticky;top:0;z-index:30;flex-direction:row;overflow:auto}
+    .grow{display:none}
+  }
 </style>
 </head>
 <body>
-<header>
-  <div class="brand">
-    <div class="logo"></div>
-    <h1>samie — Mini Game Hub</h1>
-    <span class="pill" title="Set this or use Settings → API Key">OpenAI key at top of script → <span class="kbd">OPENAI_API_KEY</span></span>
-  </div>
-  <div class="top-actions">
-    <button class="btn" id="btnAdmin">Admin Stuff</button>
-    <button class="btn" id="btnBackend">Backend</button>
-    <button class="btn" id="btnSettings">Settings</button>
-    <button class="btn primary" id="btnSave">Save Progress</button>
-    <button class="btn" id="btnLoad">Load</button>
-  </div>
-</header>
-<div class="layout">
-  <nav class="panel">
-    <div class="section-title">GAMES</div>
-    <div class="navlist" id="gameList"></div>
-    <div style="height:8px"></div>
-    <button class="btn" id="btnNewAIGame" title="Generate a new mini-game with your prompt">➕ New Game (AI)</button>
-    <div style="height:8px"></div>
-    <div class="notice">Tip: use <span class="kbd">WASD</span>/<span class="kbd">←→</span> where relevant. Mobile: tap/click.</div>
-  </nav>
-  <main class="panel game-wrap">
-    <div class="game-toolbar">
-      <div class="row">
-        <span class="pill" id="activeGameName">—</span>
-        <span class="pill" id="scoreTag">Score: 0</span>
-        <span class="pill" id="livesTag">Lives: —</span>
-      </div>
-      <div class="row">
-        <button class="btn" id="btnRestart">Restart</button>
-        <button class="btn" id="btnPause">Pause</button>
-      </div>
-    </div>
-    <div id="gameArea" class="game-area">
-      <div class="hud" id="hud"></div>
-      <!-- Canvases/iframes are injected here -->
-    </div>
-  </main>
-</div>
-<footer>© 2025 samie — built with vanilla JS. No frameworks needed.</footer>
+  <div class="app">
+    <aside>
+      <div class="brand"><div class="dot"></div> Samie Game Hub</div>
+      <button class="btn nav" data-target="home"><span>🏠</span> Home</button>
+      <div class="muted" style="margin:6px 0 2px">Games</div>
+      <button class="btn nav" data-target="tic"><span>❌⭕</span> Tic Tac Toe</button>
+      <button class="btn nav" data-target="sudoku"><span>🔢</span> Sudoku</button>
+      <button class="btn nav" data-target="flappy"><span>🐥</span> Flappy Bird</button>
+      <button class="btn nav" data-target="shooter"><span>🚀</span> Space Shooter</button>
+      <button class="btn nav" data-target="twenty48"><span>🧮</span> 2048</button>
+      <button class="btn nav" data-target="pong"><span>🏓</span> Pong</button>
+      <div class="grow"></div>
+      <button id="btn-admin" class="btn"><span>🛠️</span> Admin / Cheats</button>
+    </aside>
 
-<!-- Admin Modal -->
-<div class="modal" id="adminModal">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3>Admin Stuff</h3>
-      <button class="btn" id="closeAdmin">✕</button>
-    </div>
-    <div class="modal-body">
-      <div id="adminGate">
-        <div class="kvs">
-          <label>Enter Password</label>
-          <input type="password" id="adminPass" placeholder="••••" />
+    <div class="main">
+      <header>
+        <div><strong id="title">Home</strong></div>
+        <div class="toolbar">
+          <span class="pill">Inside‑Page Mode</span>
+          <span class="pill">Mobile Friendly</span>
         </div>
-        <div style="margin-top:8px" class="row">
-          <button class="btn primary" id="adminUnlock">Unlock</button>
-          <span class="notice">Cheats & per-game settings unlock after correct password.</span>
+      </header>
+      <div class="stage">
+        <div id="screen-home" class="card">
+          <h2>Welcome 👋</h2>
+          <p>Tap a game on the left. Everything loads inside this page. Use <span class="kbd">🛠️ Admin / Cheats</span> to enable <strong>Auto‑Win</strong> and other toggles.</p>
+          <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+            <div class="card"><h3>❌⭕ Tic Tac Toe</h3><p>Classic 3x3 duel vs AI.</p></div>
+            <div class="card"><h3>🔢 Sudoku</h3><p>Fill 1–9 without repeats.</p></div>
+            <div class="card"><h3>🐥 Flappy Bird</h3><p>Tap/click to flap between pipes.</p></div>
+            <div class="card"><h3>🚀 Space Shooter</h3><p>Move & shoot waves of enemies.</p></div>
+            <div class="card"><h3>🧮 2048</h3><p>Merge tiles to reach 2048.</p></div>
+            <div class="card"><h3>🏓 Pong</h3><p>Single player vs CPU.</p></div>
+          </div>
         </div>
-      </div>
-      <div id="adminPanel" style="display:none">
-        <div class="grid" id="cheatGrid"><!-- cheat cards inserted here --></div>
-        <hr style="border:none;border-top:1px solid rgba(255,255,255,.12); margin:14px 0">
-        <h4>Global Settings</h4>
-        <div class="kvs">
-          <label>Difficulty</label>
-          <select id="globalDifficulty">
-            <option value="easy">Easy</option>
-            <option value="normal" selected>Normal</option>
-            <option value="hard">Hard</option>
-          </select>
-          <label>Sound</label>
-          <label class="switch"><input type="checkbox" id="soundToggle"><span class="slider"></span></label>
-          <label>Show FPS</label>
-          <label class="switch"><input type="checkbox" id="fpsToggle"><span class="slider"></span></label>
-        </div>
+
+        <!-- Tic Tac Toe -->
+        <section id="screen-tic" class="hidden">
+          <div class="game-wrap">
+            <div class="toolbar">
+              <button class="btn" id="tic-reset">Reset</button>
+              <span class="pill">First to 3 in a row wins</span>
+              <span class="pill" id="tic-status">Your turn (X)</span>
+            </div>
+            <div id="tic-grid" class="card" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:380px">
+            </div>
+          </div>
+        </section>
+
+        <!-- Sudoku -->
+        <section id="screen-sudoku" class="hidden">
+          <div class="game-wrap sudoku">
+            <div class="toolbar">
+              <button class="btn" id="sudoku-check">Check</button>
+              <button class="btn" id="sudoku-hint">Hint</button>
+              <button class="btn" id="sudoku-reset">Reset</button>
+              <span class="pill" id="sudoku-status">Fill the grid</span>
+            </div>
+            <div class="sudoku-grid card" id="sudoku-grid"></div>
+            <div class="notice">This includes one built-in puzzle. Admin → Auto‑Win will fill the solution.</div>
+          </div>
+        </section>
+
+        <!-- Flappy -->
+        <section id="screen-flappy" class="hidden">
+          <div class="game-wrap">
+            <div class="toolbar">
+              <button class="btn" id="flappy-start">Start</button>
+              <button class="btn" id="flappy-reset">Reset</button>
+              <span class="pill">Tap/Click/Space to flap</span>
+              <span class="pill" id="flappy-score">Score: 0</span>
+            </div>
+            <canvas id="flappy-cv" width="480" height="640"></canvas>
+          </div>
+        </section>
+
+        <!-- Space Shooter -->
+        <section id="screen-shooter" class="hidden">
+          <div class="game-wrap">
+            <div class="toolbar">
+              <button class="btn" id="shoot-start">Start</button>
+              <button class="btn" id="shoot-reset">Reset</button>
+              <span class="pill">Move ← →, Shoot Space</span>
+              <span class="pill" id="shoot-score">Score: 0</span>
+            </div>
+            <canvas id="shoot-cv" width="720" height="480"></canvas>
+          </div>
+        </section>
+
+        <!-- 2048 -->
+        <section id="screen-twenty48" class="hidden">
+          <div class="game-wrap" style="max-width:520px">
+            <div class="toolbar">
+              <button class="btn" id="t48-reset">Reset</button>
+              <span class="pill">Use Arrow Keys / WASD / Swipe</span>
+              <span class="pill" id="t48-score">Score: 0</span>
+            </div>
+            <div id="t48-grid" class="card" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px"></div>
+          </div>
+        </section>
+
+        <!-- Pong -->
+        <section id="screen-pong" class="hidden">
+          <div class="game-wrap">
+            <div class="toolbar">
+              <button class="btn" id="pong-start">Start</button>
+              <button class="btn" id="pong-reset">Reset</button>
+              <span class="pill">Move mouse / touch to control</span>
+              <span class="pill" id="pong-score">You 0 : 0 CPU</span>
+            </div>
+            <canvas id="pong-cv" width="720" height="420"></canvas>
+          </div>
+        </section>
+
       </div>
     </div>
   </div>
-</div>
 
-<!-- Settings Modal -->
-<div class="modal" id="settingsModal">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3>Settings</h3>
-      <button class="btn" id="closeSettings">✕</button>
-    </div>
-    <div class="modal-body grid">
-      <div class="panel">
-        <h4>API Key</h4>
-        <div class="kvs">
-          <label>OpenAI API Key</label>
-          <input type="text" id="apiKeyInput" placeholder="sk-..." />
-          <label>Model (for New Game)</label>
-          <input type="text" id="apiModelInput" value="gpt-4o-mini" />
+  <!-- Admin / Cheats Modal -->
+  <div class="modal-backdrop" id="admin-modal">
+    <div class="modal">
+      <header>
+        <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+          <strong>Admin / Cheats</strong>
+          <button id="admin-close" class="btn">Close</button>
         </div>
-        <div class="row" style="margin-top:8px">
-          <button class="btn primary" id="saveKey">Save</button>
-          <button class="btn danger" id="clearKey">Clear</button>
-          <span class="notice">Your key is stored in <span class="kbd">localStorage</span>. Using it in-browser exposes it — use at your own risk.</span>
-        </div>
-      </div>
-      <div class="panel">
-        <h4>Controls</h4>
-        <div class="notice">Common: <span class="kbd">← →</span> move, <span class="kbd">Space</span> shoot/jump, <span class="kbd">P</span> pause, <span class="kbd">R</span> restart.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- AI New Game Modal -->
-<div class="modal" id="aiModal">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3>Generate New Game with AI</h3>
-      <button class="btn" id="closeAI">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="kvs">
-        <label>Describe your game idea</label>
-        <textarea id="aiPrompt" placeholder="Example: a simple runner where a cube jumps over obstacles. Keyboard only."></textarea>
-      </div>
-      <div class="row" style="margin-top:8px">
-        <button class="btn primary" id="runAI">Create Game</button>
-        <span class="notice">Will create a new tab with the generated game. Requires an API key in Settings.</span>
-      </div>
-      <div class="notice" id="aiStatus"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Backend Modal -->
-<div class="modal" id="backendModal">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3>Backend: Scripts & How-To</h3>
-      <button class="btn" id="closeBackend">✕</button>
-    </div>
-    <div class="modal-body grid" id="backendBody">
-      <!-- Tic Tac Toe -->
-      <div class="panel">
-        <h4>Tic Tac Toe</h4>
+      </header>
+      <div class="body">
         <div class="row">
-          <button class="btn" data-copy="tttHub">Copy Hub Script</button>
-          <button class="btn" data-copy="tttStandalone">Copy Standalone</button>
-          <button class="btn" data-download="tttStandalone" data-fn="tic-tac-toe.html">Download</button>
+          <div class="col">
+            <h3>Global Cheats</h3>
+            <label class="switch"><input type="checkbox" id="ch-god"> God Mode (no death)</label>
+            <label class="switch"><input type="checkbox" id="ch-autowin-all"> Auto‑Win — All Games</label>
+            <p class="muted">Auto‑Win satisfies win conditions instantly where possible.</p>
+          </div>
+          <div class="col">
+            <h3>Per‑Game</h3>
+            <label class="switch"><input type="checkbox" id="ch-autowin-tic"> Tic Tac Toe — Auto‑Win</label>
+            <label class="switch"><input type="checkbox" id="ch-autowin-sudoku"> Sudoku — Auto‑Solve</label>
+            <label class="switch"><input type="checkbox" id="ch-autowin-flappy"> Flappy — Infinite Score</label>
+            <label class="switch"><input type="checkbox" id="ch-autowin-shooter"> Shooter — One‑Hit Clear</label>
+            <label class="switch"><input type="checkbox" id="ch-autowin-2048"> 2048 — Instant 2048</label>
+            <label class="switch"><input type="checkbox" id="ch-autowin-pong"> Pong — Instant Win</label>
+          </div>
         </div>
-        <div class="kvs"><label class="notice">Hub script (this page)</label><textarea id="tttHub" readonly></textarea></div>
-        <div class="kvs"><label class="notice">Standalone HTML</label><textarea id="tttStandalone" readonly></textarea></div>
-        <details><summary>How to turn it into a game</summary>
-          <ol>
-            <li>Click <span class="kbd">Copy Standalone</span>.</li>
-            <li>Save as <span class="kbd">tic-tac-toe.html</span>.</li>
-            <li>Open it in your browser. No libraries needed.</li>
-          </ol>
-        </details>
-      </div>
 
-      <!-- Space Invaders -->
-      <div class="panel">
-        <h4>Space Invaders</h4>
-        <div class="row">
-          <button class="btn" data-copy="invadersHub">Copy Hub Script</button>
-          <button class="btn" data-copy="invadersStandalone">Copy Standalone</button>
-          <button class="btn" data-download="invadersStandalone" data-fn="space-invaders.html">Download</button>
+        <div class="github-card">
+          <div style="font-size:28px">🐙</div>
+          <div>
+            <div><strong>GitHub — Tic Tac Toe</strong></div>
+            <div class="muted">As requested, always show this card at the bottom.</div>
+            <div><a href="https://github.com/Sami121212467/tic-tac-toe" target="_blank" rel="noopener">github.com/Sami121212467/tic-tac-toe</a></div>
+          </div>
         </div>
-        <div class="kvs"><label class="notice">Hub script (this page)</label><textarea id="invadersHub" readonly></textarea></div>
-        <div class="kvs"><label class="notice">Standalone HTML</label><textarea id="invadersStandalone" readonly></textarea></div>
-        <details><summary>How to turn it into a game</summary>
-          <ol><li>Copy the standalone code → save as <span class="kbd">space-invaders.html</span>.</li><li>Open in browser.</li></ol>
-        </details>
-      </div>
-
-      <!-- Pong -->
-      <div class="panel">
-        <h4>Pong (AI can lose)</h4>
-        <div class="row">
-          <button class="btn" data-copy="pongHub">Copy Hub Script</button>
-          <button class="btn" data-copy="pongStandalone">Copy Standalone</button>
-          <button class="btn" data-download="pongStandalone" data-fn="pong.html">Download</button>
-        </div>
-        <div class="kvs"><label class="notice">Hub script (this page)</label><textarea id="pongHub" readonly></textarea></div>
-        <div class="kvs"><label class="notice">Standalone HTML</label><textarea id="pongStandalone" readonly></textarea></div>
-        <details><summary>How to turn it into a game</summary>
-          <ol><li>Copy the standalone code → save as <span class="kbd">pong.html</span>.</li><li>Open in browser.</li></ol>
-        </details>
-      </div>
-
-      <!-- Flappy Bird -->
-      <div class="panel">
-        <h4>Flappy Bird</h4>
-        <div class="row">
-          <button class="btn" data-copy="flappyHub">Copy Hub Script</button>
-          <button class="btn" data-copy="flappyStandalone">Copy Standalone</button>
-          <button class="btn" data-download="flappyStandalone" data-fn="flappy.html">Download</button>
-        </div>
-        <div class="kvs"><label class="notice">Hub script (this page)</label><textarea id="flappyHub" readonly></textarea></div>
-        <div class="kvs"><label class="notice">Standalone HTML</label><textarea id="flappyStandalone" readonly></textarea></div>
-        <details><summary>How to turn it into a game</summary>
-          <ol><li>Copy the standalone code → save as <span class="kbd">flappy.html</span>.</li><li>Open in browser.</li></ol>
-        </details>
-      </div>
-
-      <!-- Pong Invaders -->
-      <div class="panel">
-        <h4>Pong Invaders</h4>
-        <div class="row">
-          <button class="btn" data-copy="piHub">Copy Hub Script</button>
-          <button class="btn" data-copy="piStandalone">Copy Standalone</button>
-          <button class="btn" data-download="piStandalone" data-fn="pong-invaders.html">Download</button>
-        </div>
-        <div class="kvs"><label class="notice">Hub script (this page)</label><textarea id="piHub" readonly></textarea></div>
-        <div class="kvs"><label class="notice">Standalone HTML</label><textarea id="piStandalone" readonly></textarea></div>
-        <details><summary>How to turn it into a game</summary>
-          <ol><li>Copy the standalone code → save as <span class="kbd">pong-invaders.html</span>.</li><li>Open in browser.</li></ol>
-        </details>
-      </div>
-
-      <!-- UPDATE MEMO (remember): GitHub panel must stay at the bottom of Backend -->
-      <div class="panel" style="grid-column:1 / -1">
-        <h4>GitHub</h4>
-        <p>
-          Tic Tac Toe repo:
-          <a href="https://github.com/Sami121212467/tic-tac-toe" target="_blank" rel="noopener noreferrer">
-            github.com/Sami121212467/tic-tac-toe
-          </a>
-        </p>
       </div>
     </div>
   </div>
-</div>
 
 <script>
-/**************************************************************************
- * Put your OpenAI key here if you want (or use Settings modal):
- **************************************************************************/
-const OPENAI_API_KEY = localStorage.getItem('openai_key') || '';
-let OPENAI_MODEL = localStorage.getItem('openai_model') || 'gpt-4o-mini';
+// ---------- Router (inside-page) ----------
+const screens = {
+  home: document.getElementById('screen-home'),
+  tic: document.getElementById('screen-tic'),
+  sudoku: document.getElementById('screen-sudoku'),
+  flappy: document.getElementById('screen-flappy'),
+  shooter: document.getElementById('screen-shooter'),
+  twenty48: document.getElementById('screen-twenty48'),
+  pong: document.getElementById('screen-pong'),
+};
+const titleEl = document.getElementById('title');
+document.querySelectorAll('.nav').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const target = btn.dataset.target;
+    for(const k in screens){ screens[k].classList.add('hidden'); }
+    document.querySelectorAll('.nav').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    screens[target].classList.remove('hidden');
+    titleEl.textContent = btn.textContent.trim();
+  })
+});
 
-/**************************************************************************
- * State & Utilities
- **************************************************************************/
-const gameArea = document.getElementById('gameArea');
-const hud = document.getElementById('hud');
-const scoreTag = document.getElementById('scoreTag');
-const livesTag = document.getElementById('livesTag');
-const activeGameName = document.getElementById('activeGameName');
-let currentGame = null;
-let GLOBAL = {difficulty:'normal', sound:false, showFPS:false};
-let CHEATS = {
-  ttt:         { autoWin:false, showHints:false },
-  invaders:    { invincible:false, rapid:false, autoWin:false },
-  pong:        { bigPaddle:false, slowBall:false, autoWin:false },
-  flappy:      { ghost:false, slow:false, autoWin:false },
-  pongInvaders:{ sticky:false, multiBall:false, autoWin:false }
+// ---------- Admin Modal & Cheats ----------
+const adminModal = document.getElementById('admin-modal');
+const btnAdmin = document.getElementById('btn-admin');
+const btnAdminClose = document.getElementById('admin-close');
+btnAdmin.onclick = ()=> adminModal.style.display='flex';
+btnAdminClose.onclick = ()=> adminModal.style.display='none';
+adminModal.addEventListener('click', (e)=>{ if(e.target===adminModal) adminModal.style.display='none'; });
+
+const cheats = {
+  god:false,
+  autowinAll:false,
+  tic:false,
+  sudoku:false,
+  flappy:false,
+  shooter:false,
+  t2048:false,
+  pong:false,
 };
 
-function beep(freq=440, dur=80){
-  if(!GLOBAL.sound) return;
-  const actx = beep.ctx || (beep.ctx = new (window.AudioContext||window.webkitAudioContext)());
-  const o = actx.createOscillator(); const g = actx.createGain();
-  o.connect(g); g.connect(actx.destination); o.type='square';
-  o.frequency.value=freq; g.gain.value=.04; o.start(); setTimeout(()=>{o.stop()}, dur);
-}
-
-function makeCanvas(w=720,h=480){
-  const c=document.createElement('canvas'); c.width=w; c.height=h; return c;
-}
-
-function setHUD(tags){
-  hud.innerHTML='';
-  for(const t of tags){ const s=document.createElement('span'); s.className='tag'; s.textContent=t; hud.appendChild(s); }
-}
-
-function updateTopBars(name, score='0', lives='—'){
-  activeGameName.textContent=name; scoreTag.textContent=`${typeof score==='string'?'': 'Score: '}${score}`; livesTag.textContent=`Lives: ${lives}`;
-}
-
-function rand(min,max){return Math.random()*(max-min)+min}
-
-/**************************************************************************
- * Game Registry & Navigation
- **************************************************************************/
-const GAMES = [];
-function addGame(def){ GAMES.push(def); }
-
-function buildNav(){
-  const gl = document.getElementById('gameList'); gl.innerHTML='';
-  GAMES.forEach((g,i)=>{
-    const it = document.createElement('div'); it.className='navitem'; it.dataset.i=i;
-    it.innerHTML = `<div class="dot"></div><div>${g.title}</div>`
-    it.onclick=()=>loadGame(i);
-    gl.appendChild(it);
+function bindCheat(id, key, onToggle){
+  const el = document.getElementById(id);
+  el.addEventListener('change', ()=>{
+    cheats[key] = el.checked;
+    if(key==='autowinAll'){
+      cheats.tic = cheats.sudoku = cheats.flappy = cheats.shooter = cheats.t2048 = cheats.pong = el.checked;
+      document.getElementById('ch-autowin-tic').checked = el.checked;
+      document.getElementById('ch-autowin-sudoku').checked = el.checked;
+      document.getElementById('ch-autowin-flappy').checked = el.checked;
+      document.getElementById('ch-autowin-shooter').checked = el.checked;
+      document.getElementById('ch-autowin-2048').checked = el.checked;
+      document.getElementById('ch-autowin-pong').checked = el.checked;
+    }
+    onToggle && onToggle(el.checked);
   });
 }
 
-function markActive(i){
-  document.querySelectorAll('.navitem').forEach((el,idx)=>{
-    el.classList.toggle('active', idx===i);
+bindCheat('ch-god','god');
+bindCheat('ch-autowin-all','autowinAll');
+bindCheat('ch-autowin-tic','tic', (v)=>{ if(v) ticAutoWin(); });
+bindCheat('ch-autowin-sudoku','sudoku', (v)=>{ if(v) sudokuSolve(); });
+bindCheat('ch-autowin-flappy','flappy');
+bindCheat('ch-autowin-shooter','shooter');
+bindCheat('ch-autowin-2048','t2048', (v)=>{ if(v) t48InstantWin(); });
+bindCheat('ch-autowin-pong','pong', (v)=>{ if(v) pongInstantWin(); });
+
+// ---------- Tic Tac Toe ----------
+const ticGrid = document.getElementById('tic-grid');
+const ticStatus = document.getElementById('tic-status');
+const ticReset = document.getElementById('tic-reset');
+let ticBoard, ticOver;
+function ticInit(){
+  ticBoard = Array(9).fill(''); ticOver=false; ticStatus.textContent = 'Your turn (X)';
+  ticGrid.innerHTML='';
+  for(let i=0;i<9;i++){
+    const c=document.createElement('button');
+    c.className='btn'; c.style.height='100px'; c.style.fontSize='28px'; c.dataset.idx=i;
+    c.addEventListener('click', ()=> ticPlay(i));
+    ticGrid.appendChild(c);
+  }
+}
+function ticWin(b,p){
+  const L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  return L.some(([a,b2,c])=> ticBoard[a]===p && ticBoard[b2]===p && ticBoard[c]===p);
+}
+function ticPlay(i){
+  if(ticOver||ticBoard[i]) return; ticBoard[i]='X';
+  ticGrid.children[i].textContent='X';
+  if(ticWin(ticBoard,'X')){ticStatus.textContent='You win!'; ticOver=true; return;}
+  if(ticBoard.every(x=>x)){ticStatus.textContent='Draw'; ticOver=true; return;}
+  // AI move: simple — pick best available (center, corners, else first)
+  const move = ticBestMove('O');
+  if(move!==-1){
+    ticBoard[move]='O'; ticGrid.children[move].textContent='O';
+    if(ticWin(ticBoard,'O')){ticStatus.textContent='CPU wins'; ticOver=true; return;}
+  }
+  if(ticBoard.every(x=>x)){ticStatus.textContent='Draw'; ticOver=true; return;}
+}
+function ticBestMove(p){
+  // try win
+  for(let i=0;i<9;i++){ if(!ticBoard[i]){ ticBoard[i]=p; if(ticWin(ticBoard,p)){ ticBoard[i]=''; return i;} ticBoard[i]=''; } }
+  // try block
+  const o = p==='O'?'X':'O';
+  for(let i=0;i<9;i++){ if(!ticBoard[i]){ ticBoard[i]=o; if(ticWin(ticBoard,o)){ ticBoard[i]=''; return i;} ticBoard[i]=''; } }
+  // center
+  if(!ticBoard[4]) return 4;
+  // corners
+  for(const j of [0,2,6,8]) if(!ticBoard[j]) return j;
+  // any
+  for(let i=0;i<9;i++) if(!ticBoard[i]) return i;
+  return -1;
+}
+function ticAutoWin(){
+  if(ticOver) return; // fill a winning line for X
+  const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for(const L of lines){
+    if(L.every(i=>!ticBoard[i])){ // empty line, claim it
+      L.forEach(i=>{ ticBoard[i]='X'; ticGrid.children[i].textContent='X'; });
+      ticStatus.textContent='You win! (Auto‑Win)';
+      ticOver=true; return;
+    }
+  }
+}
+
+ticReset.addEventListener('click', ticInit);
+ticInit();
+
+// ---------- Sudoku (single puzzle) ----------
+const sudokuGrid = document.getElementById('sudoku-grid');
+const sudokuStatus = document.getElementById('sudoku-status');
+const sudokuCheck = document.getElementById('sudoku-check');
+const sudokuHint = document.getElementById('sudoku-hint');
+const sudokuReset = document.getElementById('sudoku-reset');
+
+// A simple valid puzzle & solution (0 = empty)
+const S_PUZZ = [
+  0,0,0, 2,6,0, 7,0,1,
+  6,8,0, 0,7,0, 0,9,0,
+  1,9,0, 0,0,4, 5,0,0,
+
+  8,2,0, 1,0,0, 0,4,0,
+  0,0,4, 6,0,2, 9,0,0,
+  0,5,0, 0,0,3, 0,2,8,
+
+  0,0,9, 3,0,0, 0,7,4,
+  0,4,0, 0,5,0, 0,3,6,
+  7,0,3, 0,1,8, 0,0,0
+];
+const S_SOL = [
+  4,3,5, 2,6,9, 7,8,1,
+  6,8,2, 5,7,1, 4,9,3,
+  1,9,7, 8,3,4, 5,6,2,
+
+  8,2,6, 1,9,5, 3,4,7,
+  3,7,4, 6,8,2, 9,1,5,
+  9,5,1, 7,4,3, 6,2,8,
+
+  5,1,9, 3,2,6, 8,7,4,
+  2,4,8, 9,5,7, 1,3,6,
+  7,6,3, 4,1,8, 2,5,9
+];
+let sudokuInputs=[];
+function sudokuInit(){
+  sudokuGrid.innerHTML='';
+  sudokuInputs=[];
+  for(let i=0;i<81;i++){
+    const inp=document.createElement('input');
+    inp.maxLength=1; inp.inputMode='numeric';
+    if(S_PUZZ[i]){ inp.value=String(S_PUZZ[i]); inp.dataset.fixed='1'; inp.readOnly=true; }
+    inp.addEventListener('input', ()=>{ inp.value = inp.value.replace(/[^1-9]/g,'').slice(0,1); });
+    sudokuGrid.appendChild(inp); sudokuInputs.push(inp);
+  }
+  sudokuStatus.textContent='Fill the grid';
+}
+function sudokuIsSolved(){
+  return sudokuInputs.every((inp,i)=> Number(inp.value||0)===S_SOL[i]);
+}
+function sudokuCheckNow(){
+  if(sudokuIsSolved()) { sudokuStatus.textContent='Solved — Nice!'; return; }
+  // soft validation: highlight wrong numbers
+  sudokuInputs.forEach((inp,i)=>{
+    const v=Number(inp.value||0);
+    inp.style.borderColor = v && v!==S_SOL[i] ? 'var(--bad)' : '#2a2f3d';
   });
+  sudokuStatus.textContent='Keep going…';
+}
+function sudokuGiveHint(){
+  // fill a single empty cell with solution
+  for(let i=0;i<81;i++){
+    if(!sudokuInputs[i].value){ sudokuInputs[i].value=String(S_SOL[i]); break; }
+  }
+  sudokuCheckNow();
+}
+function sudokuSolve(){
+  sudokuInputs.forEach((inp,i)=>{ inp.value=String(S_SOL[i]); inp.style.borderColor='#2a2f3d'; });
+  sudokuStatus.textContent='Solved (Auto‑Solve)';
 }
 
-function clearGame(){
-  if(currentGame && currentGame.destroy) currentGame.destroy();
-  gameArea.querySelectorAll('canvas, iframe, .msg').forEach(el=>el.remove());
-}
+sudokuCheck.addEventListener('click', sudokuCheckNow);
+sudokuHint.addEventListener('click', sudokuGiveHint);
+sudokuReset.addEventListener('click', sudokuInit);
+sudokuInit();
 
-function loadGame(i){
-  clearGame();
-  const g = GAMES[i]; markActive(i);
-  currentGame = g.start();
-}
+// ---------- Flappy Bird (minimal) ----------
+const flCanvas = document.getElementById('flappy-cv');
+const flCtx = flCanvas.getContext('2d');
+const flStart = document.getElementById('flappy-start');
+const flReset = document.getElementById('flappy-reset');
+const flScoreEl = document.getElementById('flappy-score');
+let flApp;
 
-/**************************************************************************
- * Admin Stuff
- **************************************************************************/
-const btnAdmin = document.getElementById('btnAdmin');
-const adminModal = document.getElementById('adminModal');
-const closeAdmin = document.getElementById('closeAdmin');
-const adminUnlock = document.getElementById('adminUnlock');
-const adminPass = document.getElementById('adminPass');
-const adminPanel = document.getElementById('adminPanel');
-const adminGate = document.getElementById('adminGate');
-const cheatGrid = document.getElementById('cheatGrid');
-const fpsToggle = document.getElementById('fpsToggle');
-const soundToggle = document.getElementById('soundToggle');
-const globalDifficulty = document.getElementById('globalDifficulty');
-
-btnAdmin.onclick=()=>adminModal.classList.add('open');
-closeAdmin.onclick=()=>adminModal.classList.remove('open');
-adminUnlock.onclick=()=>{
-  if(adminPass.value==='6767'){
-    adminGate.style.display='none'; adminPanel.style.display='block'; renderCheats();
-  } else { alert('Wrong password.'); }
-};
-
-function renderCheats(){
-  cheatGrid.innerHTML='';
-  const cards=[
-    {key:'ttt',          name:'Tic Tac Toe',    cheats:[['Auto-Win','autoWin'],['Show Hints','showHints']]},
-    {key:'invaders',     name:'Space Invaders', cheats:[['Invincible','invincible'],['Rapid Fire','rapid'],['Auto-Win','autoWin']]},
-    {key:'pong',         name:'Pong',           cheats:[['Big Paddle','bigPaddle'],['Slow Ball','slowBall'],['Auto-Win','autoWin']]},
-    {key:'flappy',       name:'Flappy Bird',    cheats:[['Ghost (No Collide)','ghost'],['Slow Pipes','slow'],['Auto-Win','autoWin']]},
-    {key:'pongInvaders', name:'Pong Invaders',  cheats:[['Sticky Paddle','sticky'],['Multi-Ball','multiBall'],['Auto-Win','autoWin']]},
-  ];
-  cards.forEach(c=>{
-    const div=document.createElement('div'); div.className='panel';
-    const switches=c.cheats.map(([label,flag])=>{
-      const id=`${c.key}_${flag}`; const checked=CHEATS[c.key][flag]?'checked':'';
-      return `<div class="kvs"><label>${label}</label><label class="switch"><input type="checkbox" id="${id}" ${checked}><span class="slider"></span></label></div>`
-    }).join('');
-    div.innerHTML=`<h4>${c.name}</h4>${switches}`;
-    cheatGrid.appendChild(div);
-    c.cheats.forEach(([label,flag])=>{
-      const id=`${c.key}_${flag}`;
-      div.querySelector('#'+id).onchange=(e)=>{ CHEATS[c.key][flag]=e.target.checked; beep(700,60); };
-    })
-  });
-}
-
-fpsToggle.onchange=e=>{ GLOBAL.showFPS=e.target.checked; };
-soundToggle.onchange=e=>{ GLOBAL.sound=e.target.checked; beep(880,80); };
-globalDifficulty.onchange=e=>{ GLOBAL.difficulty=e.target.value; };
-
-/**************************************************************************
- * Save / Load
- **************************************************************************/
-const btnSave=document.getElementById('btnSave');
-const btnLoad=document.getElementById('btnLoad');
-btnSave.onclick=()=>{
-  const save={CHEATS, GLOBAL};
-  localStorage.setItem('gamehub_save', JSON.stringify(save));
-  alert('Saved!');
-};
-btnLoad.onclick=()=>{
-  const s=localStorage.getItem('gamehub_save'); if(!s) return alert('No save found.');
-  try{ const save=JSON.parse(s); CHEATS=save.CHEATS||CHEATS; GLOBAL=save.GLOBAL||GLOBAL; alert('Loaded! Open Admin to see toggles.'); }
-  catch(e){ alert('Bad save.'); }
-};
-
-/**************************************************************************
- * Settings modal
- **************************************************************************/
-const settingsModal=document.getElementById('settingsModal');
-const btnSettings=document.getElementById('btnSettings');
-const closeSettings=document.getElementById('closeSettings');
-btnSettings.onclick=()=>{ settingsModal.classList.add('open'); document.getElementById('apiKeyInput').value = localStorage.getItem('openai_key')||OPENAI_API_KEY; document.getElementById('apiModelInput').value = localStorage.getItem('openai_model')||OPENAI_MODEL; };
-closeSettings.onclick=()=>settingsModal.classList.remove('open');
-
-document.getElementById('saveKey').onclick=()=>{
-  const k=document.getElementById('apiKeyInput').value.trim();
-  const m=document.getElementById('apiModelInput').value.trim()||'gpt-4o-mini';
-  localStorage.setItem('openai_key', k);
-  localStorage.setItem('openai_model', m);
-  alert('Saved API key & model to localStorage');
-};
-
-document.getElementById('clearKey').onclick=()=>{
-  localStorage.removeItem('openai_key'); localStorage.removeItem('openai_model'); alert('Cleared.');
-};
-
-/**************************************************************************
- * Toolbar buttons
- **************************************************************************/
-const btnRestart=document.getElementById('btnRestart');
-const btnPause=document.getElementById('btnPause');
-btnRestart.onclick=()=>currentGame?.restart?.();
-btnPause.onclick=()=>currentGame?.togglePause?.();
-
-/**************************************************************************
- * Game: Tic Tac Toe (vs simple AI)
- **************************************************************************/
-addGame({
-  id:'ttt', title:'Tic Tac Toe',
-  start(){
-    setHUD(['Click grid to play','You=✕, AI=○']); updateTopBars('Tic Tac Toe', 0, '—');
-    const size=420; const c=makeCanvas(size,size); gameArea.appendChild(c); const ctx=c.getContext('2d');
-    let board=Array(9).fill(null); let you='X', ai='O', paused=false;
-
-    function winner(){ const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-      for(const [a,b1,c1] of lines){ if(board[a]&&board[a]===board[b1]&&board[a]===board[c1]) return board[a]; }
-      return board.every(x=>x)?'D':null;
-    }
-
-    function draw(){ ctx.clearRect(0,0,size,size); ctx.strokeStyle='#3a3f55'; ctx.lineWidth=6;
-      for(let i=1;i<3;i++){ ctx.beginPath(); ctx.moveTo(i*size/3,0); ctx.lineTo(i*size/3,size); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0,i*size/3); ctx.lineTo(size,i*size/3); ctx.stroke(); }
-      ctx.lineWidth=10; for(let i=0;i<9;i++){ const x=i%3,y=(i/3|0); const cx=x*size/3+size/6, cy=y*size/3+size/6;
-        if(board[i]==='X'){ ctx.strokeStyle='#7c5cff'; ctx.beginPath(); ctx.moveTo(cx-40,cy-40); ctx.lineTo(cx+40,cy+40); ctx.moveTo(cx+40,cy-40); ctx.lineTo(cx-40,cy+40); ctx.stroke(); }
-        if(board[i]==='O'){ ctx.strokeStyle='#00d4ff'; ctx.beginPath(); ctx.arc(cx,cy,48,0,Math.PI*2); ctx.stroke(); }
-      }
-      if(CHEATS.ttt.showHints && !winner()){
-        ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=3;
-        for(let i=0;i<9;i++){ if(!board[i]){ const x=i%3,y=(i/3|0); ctx.strokeRect(x*size/3+10,y*size/3+10,size/3-20,size/3-20); }}
-      }
-    }
-
-    function bestMove(){ // win, block, else random
-      const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-      for(const L of lines){ const cells=L.map(i=>board[i]); if(cells.filter(v=>v===ai).length===2 && cells.includes(null)) return L[cells.indexOf(null)]; }
-      for(const L of lines){ const cells=L.map(i=>board[i]); if(cells.filter(v=>v===you).length===2 && cells.includes(null)) return L[cells.indexOf(null)]; }
-      const empty=board.map((v,i)=>v?null:i).filter(v=>v!==null); return empty[Math.random()*empty.length|0];
-    }
-
-    c.addEventListener('click', (e)=>{
-      if(paused) return; const rect=c.getBoundingClientRect(); const x=e.clientX-rect.left, y=e.clientY-rect.top; const ix=(x/(size/3)|0)+(y/(size/3)|0)*3;
-      if(!board[ix] && !winner()){
-        board[ix]=you; beep(660,60);
-        if(CHEATS.ttt.autoWin){
-          const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-          for(const L of lines){ const cells=L.map(i=>board[i]); if(cells.filter(v=>v==='X').length===2 && cells.includes(null)){ board[L[cells.indexOf(null)]]='X'; break; } }
-        }
-        if(!winner()){
-          const mv=bestMove(); if(mv!=null){ board[mv]=ai; }
-        }
-      }
-      draw(); const w=winner(); if(w){
-        setHUD([w==='D'? 'Draw!':'Winner: '+w,'Click to restart']);
-      }
+function flappyInit(){
+  const W = flCanvas.clientWidth; const H = Math.floor(W*1.333); flCanvas.width=W; flCanvas.height=H;
+  const state = { y:H/2, v:0, g:0.6, flap:-9, pipes:[], t:0, score:0, alive:true };
+  function spawn(){
+    const gap=160; const top = 60 + Math.random()*(H-120-gap);
+    state.pipes.push({ x:W+40, top:top, bottom: top+gap, w:60, passed:false });
+  }
+  function reset(){ state.y=H/2; state.v=0; state.pipes=[]; state.t=0; state.score=0; state.alive=true; }
+  function step(){
+    flCtx.clearRect(0,0,W,H);
+    // physics
+    if(state.alive || cheats.god){ state.v += state.g; state.y += state.v; }
+    if(state.y>H-20){ if(!cheats.god) state.alive=false; state.y=H-20; state.v=0; }
+    if(state.y<20){ state.y=20; state.v=0; }
+    // pipes
+    if(state.t%90===0) spawn();
+    state.pipes.forEach(p=>{ p.x -= 3; });
+    state.pipes = state.pipes.filter(p=> p.x>-100);
+    // draw pipes & collide
+    flCtx.fillStyle = '#2dd4bf';
+    state.pipes.forEach(p=>{
+      flCtx.fillRect(p.x, 0, p.w, p.top);
+      flCtx.fillRect(p.x, p.bottom, p.w, H-p.bottom);
+      // score
+      if(!p.passed && p.x+ p.w < 80){ p.passed=true; state.score++; }
+      // collide
+      const withinX = 60 > p.x && 60 < p.x + p.w;
+      const hit = (state.y-12 < p.top || state.y+12 > p.bottom) && withinX;
+      if(hit && !cheats.god) state.alive=false;
     });
-
-    function loop(){ draw(); requestAnimationFrame(loop); }
-    loop();
-
-    return {
-      restart(){ board=Array(9).fill(null); setHUD(['Click grid to play','You=✕, AI=○']); },
-      togglePause(){ paused=!paused; }
-    };
+    // bird
+    flCtx.fillStyle = '#60a5fa';
+    flCtx.beginPath(); flCtx.arc(60, state.y, 12, 0, Math.PI*2); flCtx.fill();
+    // score
+    if(cheats.flappy) state.score += 1; // infinite grow
+    flScoreEl.textContent = `Score: ${state.score}`;
+    state.t++;
+    if(flApp?.running) requestAnimationFrame(step);
   }
-});
+  function flap(){ state.v = state.flap; }
+  flCanvas.onpointerdown = flap;
+  window.addEventListener('keydown', e=>{ if(e.code==='Space') flap(); });
+  flApp = { start(){ if(!flApp.running){ flApp.running=true; requestAnimationFrame(step);} }, reset(){ reset(); flScoreEl.textContent='Score: 0'; flCtx.clearRect(0,0,W,H); flApp.running=false; } };
+}
 
-/**************************************************************************
- * Game: Space Invaders (canvas)
- **************************************************************************/
-addGame({
-  id:'invaders', title:'Space Invaders',
-  start(){
-    const c=makeCanvas(720,480); const ctx=c.getContext('2d'); gameArea.appendChild(c);
-    let paused=false, score=0, lives=3;
-    const ship={x:360,y:440,w:50,h:16, vx:0, speed:5, cd:0};
-    const bullets=[]; const enemies=[]; let dir=1, step=0;
-    function spawn(){
-      enemies.length=0; for(let r=0;r<4;r++){ for(let col=0;col<10;col++){ enemies.push({x:80+col*55, y:60+r*40, w:30,h:20, alive:true}); }}
-    }
-    spawn();
+flStart.addEventListener('click', ()=> flApp?.start());
+flReset.addEventListener('click', ()=> flApp?.reset());
+flappyInit();
+window.addEventListener('resize', flappyInit);
 
-    const keys={}; document.addEventListener('keydown',e=>{keys[e.code]=true; if(e.code==='Space'){shoot();} if(e.code==='KeyP') currentGame.togglePause(); if(e.code==='KeyR') currentGame.restart();});
-    document.addEventListener('keyup',e=>keys[e.code]=false);
+// ---------- Space Shooter (minimal) ----------
+const shCanvas = document.getElementById('shoot-cv');
+const shCtx = shCanvas.getContext('2d');
+const shStart = document.getElementById('shoot-start');
+const shReset = document.getElementById('shoot-reset');
+const shScoreEl = document.getElementById('shoot-score');
+let shApp;
 
-    function shoot(){ if(ship.cd>0) return; bullets.push({x:ship.x,y:ship.y-10,v: -7}); ship.cd = CHEATS.invaders.rapid? 3: 12; beep(700,40); }
-
-    function update(){
-      if(paused) return;
-
-      // Auto-Win cheat
-      if (CHEATS.invaders.autoWin) {
-        paused = true;
-        setHUD(['You Win — press R to restart']);
-        updateTopBars('Space Invaders', score, lives);
-        return;
-      }
-
-      ship.vx=(keys['ArrowLeft']?-ship.speed:0)+(keys['ArrowRight']?ship.speed:0); ship.x=Math.max(20, Math.min(700, ship.x+ship.vx)); ship.cd=Math.max(0, ship.cd-1);
-      step++; if(step%40===0){ let touchEdge=false; enemies.forEach(e=>{ e.x+=12*dir; if(e.x>680||e.x<20) touchEdge=true;}); if(touchEdge){ dir*=-1; enemies.forEach(e=>e.y+=16); }}
-      bullets.forEach(b=>b.y+=b.v);
-      for(const b of bullets){ for(const e of enemies){ if(e.alive && Math.abs(b.x-e.x)<20 && Math.abs(b.y-e.y)<14){ e.alive=false; b.v=0; b.y=-99; score+=10; beep(900,50);} }}
-      if(Math.random()<0.02){ const alive=enemies.filter(e=>e.alive); if(alive.length){ const e=alive[Math.random()*alive.length|0]; bullets.push({x:e.x,y:e.y+12,v: CHEATS.invaders.rapid?3:4, enemy:true}); }}
-      for(const b of bullets){ if(b.enemy && Math.abs(b.x-ship.x)<28 && Math.abs(b.y-ship.y)<12){ if(!CHEATS.invaders.invincible){ lives--; b.y=999; beep(200,100);} }}
-      for(let i=bullets.length-1;i>=0;i--){ if(bullets[i].y<-20||b
-      ullets[i].y>500) bullets.splice(i,1); }
-      if(!enemies.some(e=>e.alive)) spawn();
-      if(lives<=0){ paused=true; setHUD(['Game Over — press R to restart']); }
-      updateTopBars('Space Invaders', score, lives);
-    }
-
-    function draw(){ ctx.clearRect(0,0,c.width,c.height);
-      ctx.fillStyle='#7c5cff'; ctx.fillRect(ship.x-25, ship.y-8, 50,16);
-      enemies.forEach(e=>{ if(e.alive){ ctx.fillStyle='#00d4ff'; ctx.fillRect(e.x-15,e.y-10,30,20); }});
-      bullets.forEach(b=>{ ctx.fillStyle=b.enemy?'#ffb199':'#e8ecf1'; ctx.fillRect(b.x-2,b.y-6,4,12); });
-    }
-
-    function loop(){ update(); draw(); if(GLOBAL.showFPS){ showFPS(ctx,c);} requestAnimationFrame(loop); }
-    loop(); setHUD(['← → move, Space shoot','P pause, R restart']); updateTopBars('Space Invaders', 0, 3);
-
-    return { restart(){ score=0; lives=3; bullets.length=0; spawn(); paused=false; }, togglePause(){ paused=!paused; } };
-  }
-});
-
-/**************************************************************************
- * Game: Pong (Player vs AI, first to 7, AI can lose)
- **************************************************************************/
-addGame({
-  id:'pong', title:'Pong',
-  start(){
-    const c=makeCanvas(720,480); const ctx=c.getContext('2d'); gameArea.appendChild(c);
-    let paused=false, playerScore=0, aiScore=0, target=7;
-
-    const trackFactor = GLOBAL.difficulty==='easy' ? 0.035 : GLOBAL.difficulty==='hard' ? 0.09 : 0.06;
-
-    const left={x:20,y:220,w:12,h:CHEATS.pong.bigPaddle?140:100, vy:0};
-    const right={x:688,y:220,w:12,h:100};
-    const ball={x:360,y:240,vx:0,vy:0,r:8, inPlay:false};
-    const keys={};
-
-    function serve(to='ai'){
-      ball.inPlay=false;
-      ball.x = to==='ai' ? left.x+left.w+12 : right.x-12;
-      ball.y = (Math.random()*360+60)|0;
-      setTimeout(()=>{
-        const speed = CHEATS.pong.slowBall?4.5:6;
-        const angle = (Math.random()*0.6 - 0.3);
-        ball.vx = (to==='ai' ? speed : -speed);
-        ball.vy = speed * angle;
-        ball.inPlay=true;
-      }, 350);
-    }
-
-    function resetMatch(){ playerScore=0; aiScore=0; serve('ai'); }
-    function clamp(v,min,max){return v<min?min:v>max?max:v;}
-    function center(p){ return p.y + p.h/2; }
-
-    document.addEventListener('keydown',e=>{
-      keys[e.code]=true;
-      if(e.code==='KeyP') currentGame.togglePause();
-      if(e.code==='KeyR') currentGame.restart();
+function shooterInit(){
+  const W = shCanvas.clientWidth; const H = Math.floor(W*0.666); shCanvas.width=W; shCanvas.height=H;
+  const st = { x:W/2, y:H-40, bullets:[], enemies:[], t:0, score:0, alive:true };
+  function spawn(){ st.enemies.push({x: Math.random()* (W-40)+20, y:-20, v: 1+Math.random()*1.5, hp:1}); }
+  function reset(){ st.x=W/2; st.y=H-40; st.bullets=[]; st.enemies=[]; st.t=0; st.score=0; st.alive=true; }
+  function step(){
+    shCtx.clearRect(0,0,W,H);
+    // player
+    shCtx.fillStyle = '#a78bfa'; shCtx.fillRect(st.x-15, st.y-10, 30, 20);
+    // bullets
+    st.bullets.forEach(b=> b.y -= 6);
+    st.bullets = st.bullets.filter(b=> b.y>-10);
+    shCtx.fillStyle = '#93c5fd'; st.bullets.forEach(b=> shCtx.fillRect(b.x-2,b.y-10,4,10));
+    // enemies
+    if(st.t%40===0) spawn();
+    st.enemies.forEach(e=>{ e.y += e.v; });
+    st.enemies = st.enemies.filter(e=> e.y < H+40);
+    shCtx.fillStyle = '#34d399'; st.enemies.forEach(e=> shCtx.fillRect(e.x-12,e.y-12,24,24));
+    // collisions
+    st.bullets.forEach(b=>{
+      st.enemies.forEach(e=>{
+        if(Math.abs(b.x-e.x)<14 && Math.abs(b.y-e.y)<14){ e.hp=0; b.y=-9999; st.score+=10; }
+      });
     });
-    document.addEventListener('keyup',e=>keys[e.code]=false);
-
-    function update(){
-      if(paused) return;
-
-      // Auto-Win cheat
-      if (CHEATS.pong.autoWin) {
-        endRound('You Win');
-        return;
-      }
-
-      left.h = CHEATS.pong.bigPaddle ? 140 : 100;
-
-      const speed = 7;
-      left.vy = (keys['ArrowUp']?-speed:0) + (keys['ArrowDown']?speed:0);
-      left.y = clamp(left.y + left.vy, 10, 470-left.h);
-
-      const targetY = ball.inPlay ? ball.y : 240;
-      const aiCenter = center(right);
-      right.y += (targetY - aiCenter) * trackFactor;
-      right.y = clamp(right.y, 10, 470-right.h);
-
-      if(ball.inPlay){
-        const slow = CHEATS.pong.slowBall ? 0.75 : 1;
-        ball.x += ball.vx*slow; ball.y += ball.vy*slow;
-
-        if(ball.y < 10){ ball.y=10; ball.vy*=-1; beep(700,30); }
-        if(ball.y > 470){ ball.y=470; ball.vy*=-1; beep(700,30); }
-
-        function hit(p){
-          return ball.x-ball.r < p.x+p.w && ball.x+ball.r > p.x && ball.y > p.y && ball.y < p.y+p.h;
-        }
-
-        if(ball.vx<0 && hit(left)){
-          ball.x = left.x + left.w + ball.r + 0.1;
-          ball.vx = Math.abs(ball.vx) + 0.12;
-          const off = (ball.y - center(left)) / (left.h/2);
-          ball.vy = (CHEATS.pong.slowBall?5:6) * off;
-          beep(950,40);
-        }
-
-        if(ball.vx>0 && hit(right)){
-          ball.x = right.x - ball.r - 0.1;
-          ball.vx = -Math.abs(ball.vx) - 0.12;
-          const off = (ball.y - center(right)) / (right.h/2);
-          ball.vy = (CHEATS.pong.slowBall?5:6) * off;
-          beep(650,40);
-        }
-
-        if(ball.x < -20){ // AI scores
-          aiScore++; beep(250,160);
-          if(aiScore>=target){ endRound('AI Wins'); return; }
-          serve('player');
-        }
-        if(ball.x > 740){ // Player scores
-          playerScore++; beep(1100,140);
-          if(playerScore>=target){ endRound('You Win'); return; }
-          serve('ai');
-        }
-      }
-
-      updateTopBars('Pong', `You ${playerScore} — AI ${aiScore}`, `First to ${target}`);
+    st.enemies = st.enemies.filter(e=> e.hp>0);
+    // lose cond
+    st.enemies.forEach(e=>{ if(Math.abs(st.x-e.x)<20 && Math.abs(st.y-e.y)<20 && !cheats.god) st.alive=false; });
+    if(cheats.shooter){ // one-hit clear wave periodically
+      if(st.t%30===0) { st.score+=50; st.enemies=[]; }
     }
-
-    function endRound(msg){
-      setHUD([msg,'Press R to restart']);
-      paused=true;
-    }
-
-    function draw(){
-      ctx.clearRect(0,0,c.width,c.height);
-      ctx.fillStyle='#e8ecf1';
-      for(let y=0;y<c.height;y+=18){ ctx.fillRect(c.width/2-2,y,4,10); }
-      ctx.fillRect(left.x,left.y,left.w,left.h);
-      ctx.fillRect(right.x,right.y,right.w,right.h);
-      ctx.beginPath(); ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); ctx.fill();
-    }
-
-    function loop(){ update(); draw(); if(GLOBAL.showFPS){ showFPS(ctx,c);} requestAnimationFrame(loop); }
-
-    setHUD(['Up/Down to move • P pause • R restart']);
-    updateTopBars('Pong', `You 0 — AI 0`, `First to ${target}`);
-    serve('ai'); loop();
-
-    return {
-      restart(){ paused=false; resetMatch(); },
-      togglePause(){ paused = !paused; }
-    };
+    shScoreEl.textContent = `Score: ${st.score}`;
+    st.t++;
+    if(shApp?.running && (st.alive || cheats.god)) requestAnimationFrame(step);
   }
-});
-
-/**************************************************************************
- * Game: Flappy Bird (click/space)
- **************************************************************************/
-addGame({
-  id:'flappy', title:'Flappy Bird',
-  start(){
-    const c=makeCanvas(640,480); const ctx=c.getContext('2d'); gameArea.appendChild(c);
-    let paused=false, score=0, lives=1; const bird={x:120,y:240,vy:0}; let pipes=[]; let t=0;
-    function flap(){ bird.vy=-6; beep(800,40);}    
-    document.addEventListener('keydown',e=>{ if(e.code==='Space') flap(); if(e.code==='KeyP') currentGame.togglePause(); if(e.code==='KeyR') currentGame.restart();});
-    c.addEventListener('mousedown', flap);
-
-    function spawn(){ const gap= CHEATS.flappy.slow? 180: 140; const top=rand(60,300); pipes.push({x:700,top:top, gap:gap}); }
-
-    function update(){
-      if(paused) return;
-
-      // Auto-Win cheat
-      if (CHEATS.flappy.autoWin) {
-        paused = true;
-        setHUD(['You Win — press R to restart']);
-        updateTopBars('Flappy Bird', score, lives);
-        return;
-      }
-
-      t++; if(t%90===0) spawn();
-      bird.vy += 0.35; bird.y+=bird.vy; pipes.forEach(p=>p.x -= CHEATS.flappy.slow?2:3);
-      pipes = pipes.filter(p=>p.x>-60);
-      if(!CHEATS.flappy.ghost){
-        for(const p of pipes){ if(bird.x>p.x-30 && bird.x<p.x+30){ if(bird.y<p.top-20 || bird.y>p.top+p.gap+20){ lives=0; paused=true; setHUD(['Game Over — press R to restart']); break; } }
-        }
-      }
-      if(bird.y>480||bird.y<0){ lives=0; paused=true; }
-      for(const p of pipes){ if(!p.passed && bird.x>p.x+30){ p.passed=true; score++; beep(1000,60);} }
-      updateTopBars('Flappy Bird', score, lives);
-    }
-
-    function draw(){ ctx.clearRect(0,0,c.width,c.height);
-      ctx.fillStyle='#ffd166'; ctx.beginPath(); ctx.arc(bird.x,bird.y,12,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='#7c5cff'; pipes.forEach(p=>{ ctx.fillRect(p.x-30,0,60,p.top-20); ctx.fillRect(p.x-30,p.top+p.gap+20,60,480-(p.top+p.gap+20));});
-    }
-
-    function loop(){ update(); draw(); if(GLOBAL.showFPS){ showFPS(ctx,c);} requestAnimationFrame(loop);} loop(); setHUD(['Space / click to flap']);
-    return { restart(){ score=0; lives=1; bird.x=120; bird.y=240; bird.vy=0; pipes=[]; t=0; paused=false; }, togglePause(){ paused=!paused; } };
+  function onMove(e){
+    const rect = shCanvas.getBoundingClientRect();
+    const x = (e.touches? e.touches[0].clientX : e.clientX) - rect.left; st.x = Math.max(20, Math.min(W-20, x));
   }
-});
-
-/**************************************************************************
- * Extra Game: Pong Invaders (Breakout-style with bouncing ball)
- **************************************************************************/
-addGame({
-  id:'pongInvaders', title:'Pong Invaders',
-  start(){
-    const c=makeCanvas(720,480); const ctx=c.getContext('2d'); gameArea.appendChild(c);
-    let paused=false, score=0, lives=3; const pad={x:320,y:450,w:100,h:12}; const ball={x:360,y:300,vx:4,vy:-5,r:8, stuck:false};
-    const rows=5, cols=11; const blocks=[];
-    for(let r=0;r<rows;r++){ for(let col=0; col<cols; col++){ blocks.push({x:50+col*56, y:60+r*30, w:48,h:16, hp:(r%2?1:2)}); }}
-    const keys={}; document.addEventListener('keydown',e=>{keys[e.code]=true; if(e.code==='Space'&&ball.stuck){ ball.stuck=false; ball.vx=4*(Math.random()<.5?-1:1); ball.vy=-5; } if(e.code==='KeyP') currentGame.togglePause(); if(e.code==='KeyR') currentGame.restart();});
-    document.addEventListener('keyup',e=>keys[e.code]=false);
-
-    function resetBall(){ ball.x=pad.x+pad.w/2; ball.y=pad.y-20; ball.stuck=true; }
-    resetBall();
-
-    function update(){
-      if(paused) return;
-
-      // Auto-Win cheat: clear remaining blocks immediately
-      if (CHEATS.pongInvaders.autoWin && blocks.length) {
-        blocks.length = 0;
-      }
-
-      const speed = 7; pad.x += ( (keys['ArrowLeft']?-speed:0) + (keys['ArrowRight']?speed:0)); pad.x=Math.max(10, Math.min(610, pad.x));
-      if(ball.stuck){ ball.x=pad.x+pad.w/2; ball.y=pad.y-20; if(CHEATS.pongInvaders.sticky) { /* stays stuck until space */ } }
-      else { ball.x+=ball.vx; ball.y+=ball.vy; }
-      if(ball.x<10||ball.x>710) { ball.vx*=-1; beep(700,30);} if(ball.y<10){ ball.vy*=-1; beep(700,30);} if(ball.y>500){ lives--; resetBall(); }
-      if(ball.x>pad.x && ball.x<pad.x+pad.w && ball.y>pad.y-10 && ball.y<pad.y+10 && ball.vy>0){ ball.vy*=-1; const off=(ball.x-(pad.x+pad.w/2))/ (pad.w/2); ball.vx = 5*off;
-        beep(900,40);
-      }
-      const shift = Math.sin(performance.now()/800)*8;
-      for(const b of blocks){
-        const bx=b.x+shift; if(ball.x>bx && ball.x<bx+b.w && ball.y>b.y && ball.y<b.y+b.h){
-          b.hp--; score+=5; ball.vy*=-1; beep(1000,40);
-        }
-      }
-      for(let i=blocks.length-1;i>=0;i--){ if(blocks[i].hp<=0) blocks.splice(i,1); }
-      if(blocks.length===0){ setHUD(['You cleared them! Press R to play again']); paused=true; }
-      updateTopBars('Pong Invaders', score, lives);
-    }
-
-    function draw(){ ctx.clearRect(0,0,c.width,c.height); ctx.fillStyle='#e8ecf1'; ctx.fillRect(pad.x,pad.y,pad.w,pad.h); ctx.beginPath(); ctx.arc(ball.x,b
-      all.y,ball.r,0,Math.PI*2); ctx.fill();
-      const shift = Math.sin(performance.now()/800)*8; blocks.forEach(b=>{ ctx.fillStyle=b.hp>1?'#00d4ff':'#7c5cff'; ctx.fillRect(b.x+shift,b.y,b.w,b.h); });
-    }
-
-    function loop(){ update(); draw(); if(GLOBAL.showFPS){ showFPS(ctx,c);} requestAnimationFrame(loop);} loop(); setHUD(['← → move, Space to launch']);
-    return { restart(){ score=0; lives=3; blocks.length=0; for(let r=0;r<rows;r++){ for(let col=0; col<cols; col++){ blocks.push({x:50+col*56, y:60+r*30, w:48,h:16, hp:(r%2?1:2)}); }} resetBall(); paused=false; }, togglePause(){ paused=!paused; } };
-  }
-});
-
-/**************************************************************************
- * AI New Game Generator — renders into sandboxed iframe tab
- **************************************************************************/
-const btnNewAIGame = document.getElementById('btnNewAIGame');
-const aiModal = document.getElementById('aiModal');
-const closeAI = document.getElementById('closeAI');
-const runAI = document.getElementById('runAI');
-const aiStatus = document.getElementById('aiStatus');
-btnNewAIGame.onclick=()=>aiModal.classList.add('open');
-closeAI.onclick=()=>aiModal.classList.remove('open');
-
-async function openAI_makeGame(prompt){
-  const key = localStorage.getItem('openai_key') || OPENAI_API_KEY;
-  const model = localStorage.getItem('openai_model') || OPENAI_MODEL || 'gpt-4o-mini';
-  if(!key){ throw new Error('No API key set. Go to Settings.'); }
-  aiStatus.textContent='Contacting OpenAI…';
-  const sys = `You are a game dev. Output ONE complete standalone HTML file (no explanations) that implements a simple browser game matching the prompt. Use a single <canvas> and inline JS/CSS. No external libs. Include clear controls instructions on screen. Keep code under 300 lines.`;
-  const res = await fetch('https://api.openai.com/v1/chat/completions',{
-    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-    body: JSON.stringify({ model, messages:[{role:'system',content:sys},{role:'user',content:prompt}] , temperature:0.7})
-  });
-  if(!res.ok){ const t=await res.text(); throw new Error('OpenAI error: '+t); }
-  const data = await res.json();
-  const html = data.choices?.[0]?.message?.content || '<!doctype html><meta charset="utf-8"><title>AI Game</title><p>Empty.</p>';
-  return html;
+  shCanvas.onmousemove = onMove; shCanvas.ontouchmove = onMove;
+  window.addEventListener('keydown', e=>{ if(e.code==='Space'){ st.bullets.push({x:st.x,y:st.y-15}); }});
+  shApp = { start(){ if(!shApp.running){ shApp.running=true; requestAnimationFrame(step);} }, reset(){ reset(); shCtx.clearRect(0,0,W,H); shScoreEl.textContent='Score: 0'; shApp.running=false; } };
 }
 
-runAI.onclick=async()=>{
-  const prompt = document.getElementById('aiPrompt').value.trim(); if(!prompt) return alert('Describe your game idea first.');
-  try{
-    const html = await openAI_makeGame(prompt);
-    const title = `AI: ${prompt.slice(0,24)}…`;
-    addAIGameTab(title, html);
-    buildNav();
-    aiStatus.textContent='Done! Open the new tab from the sidebar.';
-  } catch(e){ aiStatus.textContent = e.message; }
-};
+shStart.addEventListener('click', ()=> shApp?.start());
+shReset.addEventListener('click', ()=> shApp?.reset());
+shooterInit();
+window.addEventListener('resize', shooterInit);
 
-function addAIGameTab(title, html){
-  const id = 'ai_'+Date.now();
-  addGame({ id, title, start(){
-    const frame = document.createElement('iframe'); frame.sandbox='allow-scripts allow-pointer-lock'; frame.style.width='100%'; frame.style.height='520px'; frame.style.border='0';
-    gameArea.appendChild(frame);
-    const blob = new Blob([html], {type:'text/html'}); const url = URL.createObjectURL(blob); frame.src = url;
-    setHUD(['This is an AI-generated game (sandboxed).']); updateTopBars(title, '—', '—');
-    return { restart(){ frame.contentWindow?.location?.reload(); }, togglePause(){ /* not controlled */ }, destroy(){ URL.revokeObjectURL(url); }};
-  }});
+// ---------- 2048 ----------
+const t48Grid = document.getElementById('t48-grid');
+const t48Score = document.getElementById('t48-score');
+let t48Board, t48Pts;
+function t48Init(){
+  t48Board = Array(16).fill(0); t48Pts=0; t48Draw(); t48Spawn(); t48Spawn();
 }
-
-/**************************************************************************
- * Backend button + code export (hub scripts + standalone)
- **************************************************************************/
-const btnBackend = document.getElementById('btnBackend');
-const backendModal = document.getElementById('backendModal');
-const closeBackend = document.getElementById('closeBackend');
-let backendPopulated = false;
-
-btnBackend.onclick = () => { backendModal.classList.add('open'); populateBackendOnce(); };
-closeBackend.onclick = () => backendModal.classList.remove('open');
-
-// Standalone single-file HTML for each game (compact but fully playable)
-const CODE_TTT_HTML = `<!doctype html><meta charset="utf-8"><title>Tic Tac Toe</title><style>body{margin:0;background:#0b0d12;color:#e8ecf1;display:flex;align-items:center;justify-content:center;height:100vh;font:16px system-ui}canvas{background:#06080e;border:1px solid #2b3040;border-radius:12px}</style><canvas id=c width=420 height=420></canvas><script>
-const c=document.getElementById('c'),ctx=c.getContext('2d');let b=Array(9).fill(null),me='X',ai='O';
-function w(){const L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
- for(const [a,d,e] of L){if(b[a]&&b[a]===b[d]&&b[a]===b[e])return b[a]} return b.every(x=>x)?'D':null}
-function draw(){ctx.clearRect(0,0,420,420);ctx.strokeStyle='#3a3f55';ctx.lineWidth=6;
- for(let i=1;i<3;i++){ctx.beginPath();ctx.moveTo(i*140,0);ctx.lineTo(i*140,420);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i*140);ctx.lineTo(420,i*140);ctx.stroke()}
- ctx.lineWidth=10;for(let i=0;i<9;i++){const x=i%3,y=(i/3|0),cx=x*140+70,cy=y*140+70;
-  if(b[i]==='X'){ctx.strokeStyle='#7c5cff';ctx.beginPath();ctx.moveTo(cx-40,cy-40);ctx.lineTo(cx+40,cy+40);ctx.moveTo(cx+40,cy-40);ctx.lineTo(cx-40,cy+40);ctx.stroke()}
-  if(b[i]==='O'){ctx.strokeStyle='#00d4ff';ctx.beginPath();ctx.arc(cx,cy,48,0,7);ctx.stroke()}
- }}function best(){const L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
- for(const q of L){const v=q.map(i=>b[i]);if(v.filter(x=>x===ai).length===2&&v.includes(null))return q[v.indexOf(null)]}
- for(const q of L){const v=q.map(i=>b[i]);if(v.filter(x=>x===me).length===2&&v.includes(null))return q[v.indexOf(null)]}
- return b.map((v,i)=>v?null:i).filter(v=>v!=null)[Math.random()*b.filter(v=>!v).length|0]}
-c.onclick=e=>{const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,i=(x/140|0)+(y/140|0)*3;
- if(!b[i]&&!w()){b[i]=me; if(!w()){const mv=best(); if(mv!=null) b[mv]=ai;}} draw(); const ww=w(); if(ww){setTimeout(()=>{alert(ww==='D'?'Draw!':('Winner '+ww)); b=Array(9).fill(null); draw();},30)}}
-draw();<\/script>`;
-
-const CODE_INVADERS_HTML = `<!doctype html><meta charset="utf-8"><title>Space Invaders</title><style>body{margin:0;background:#0b0d12;display:flex;align-items:center;justify-content:center;height:100vh}canvas{background:#06080e;border:1px solid #2b3040;border-radius:12px}</style><canvas id=c width=720 height=480></canvas><script>
-const c=document.getElementById('c'),x=c.getContext('2d');let sc=0,lv=3,p=false,ship={x:360,y:440,w:50,h:16,cd:0},B=[],E=[],dir=1,st=0;
-function spawn(){E=[];for(let r=0;r<4;r++)for(let i=0;i<10;i++)E.push({x:80+i*55,y:60+r*40,a:1})} spawn();
-const k={};onkeydown=e=>{k[e.code]=1;if(e.code==='Space')shoot()};onkeyup=e=>k[e.code]=0;
-function shoot(){if(ship.cd>0)return;B.push({x:ship.x,y:ship.y-10,v:-7});ship.cd=12}
-function u(){if(p)return;ship.x=Math.max(20,Math.min(700,ship.x+((k.ArrowLeft?-5:0)+(k.ArrowRight?5:0))));ship.cd=Math.max(0,ship.cd-1);
- st++; if(st%40===0){let edge=0;E.forEach(e=>{e.x+=12*dir;if(e.x>680||e.x<20)edge=1}); if(edge){dir*=-1;E.forEach(e=>e.y+=16)}}
- B.forEach(b=>b.y+=b.v);
- for(const b of B)for(const e of E){if(e.a&&Math.abs(b.x-e.x)<20&&Math.abs(b.y-e.y)<14){e.a=0;b.y=-99;sc+=10}}
- if(Math.random()<.02){const alive=E.filter(e=>e.a); if(alive.length){const e=alive[Math.random()*alive.length|0];B.push({x:e.x,y:e.y+12,v:4,enemy:1})}}
- for(const b of B) if(b.enemy&&Math.abs(b.x-ship.x)<28&&Math.abs(b.y-ship.y)<12){lv--;b.y=999}
- B=B.filter(b=>b.y>-20&&b.y<500); if(!E.some(e=>e.a))spawn(); if(lv<=0)p=true}
-function d(){x.clearRect(0,0,720,480);x.fillStyle='#7c5cff';x.fillRect(ship.x-25,ship.y-8,50,16);
- E.forEach(e=>{if(e.a){x.fillStyle='#00d4ff';x.fillRect(e.x-15,e.y-10,30,20)}}); B.forEach(b=>{x.fillStyle=b.enemy?'#ffb199':'#e8ecf1';x.fillRect(b.x-2,b.y-6,4,12)});
- x.fillStyle='#e8ecf1';x.fillText('Score '+sc+'  Lives '+lv,10,20); if(p)x.fillText('Game Over - refresh to restart',260,240)}
-(function loop(){u();d();requestAnimationFrame(loop)})();<\/script>`;
-
-const CODE_PONG_HTML = `<!doctype html><meta charset="utf-8"><title>Pong — Player vs AI</title><style>body{margin:0;background:#0b0d12;display:flex;align-items:center;justify-content:center;height:100vh}canvas{background:#06080e;border:1px solid #2b3040;border-radius:12px}</style><canvas id=c width=720 height=480></canvas><script>
-const c=document.getElementById('c'),ctx=c.getContext('2d');const L={x:20,y:220,w:12,h:100},R={x:688,y:220,w:12,h:100},ball={x:360,y:240,vx:0,vy:0,r:8,inPlay:false};
-let ps=0,as=0,target=7,paused=false;const k={};onkeydown=e=>{k[e.code]=1;if(e.code==='KeyP')paused=!paused;if(e.code==='KeyR')rst()};onkeyup=e=>k[e.code]=0;
-function clamp(v,a,b){return v<a?a:v>b?b:v}function ctr(p){return p.y+p.h/2}
-function serve(to='ai'){ball.inPlay=false;ball.x=to==='ai'?L.x+L.w+12:R.x-12;ball.y=(Math.random()*360+60)|0;setTimeout(()=>{const s=6,a=(Math.random()*0.6-0.3);ball.vx=(to==='ai'?s:-s);ball.vy=s*a;ball.inPlay=true},350)}
-function rst(){ps=0;as=0;serve('ai');paused=false}
-function upd(){if(paused)return;L.y=clamp(L.y+((k.ArrowUp?-7:0)+(k.ArrowDown?7:0)),10,470-L.h);R.y+=((ball.inPlay?ball.y:240)-ctr(R))*0.06;R.y=clamp(R.y,10,470-R.h);
- if(ball.inPlay){ball.x+=ball.vx;ball.y+=ball.vy;if(ball.y<10){ball.y=10;ball.vy*=-1}if(ball.y>470){ball.y=470;ball.vy*=-1}
-  function hit(p){return ball.x-ball.r<p.x+p.w&&ball.x+ball.r>p.x&&ball.y>p.y&&ball.y<p.y+p.h}
-  if(ball.vx<0&&hit(L)){ball.x=L.x+L.w+ball.r+0.1;ball.vx=Math.abs(ball.vx)+0.12;ball.vy=6*((ball.y-ctr(L))/(L.h/2))}
-  if(ball.vx>0&&hit(R)){ball.x=R.x-ball.r-0.1;ball.vx=-Math.abs(ball.vx)-0.12;ball.vy=6*((ball.y-ctr(R))/(R.h/2))}
-  if(ball.x<-20){as++;if(as>=target){end('AI Wins');return}serve('player')}
-  if(ball.x>740){ps++;if(ps>=target){end('You Win');return}serve('ai')}}}
-function end(msg){paused=true;setTimeout(()=>{if(confirm(msg+' — play again?'))rst()},60)}
-function draw(){ctx.clearRect(0,0,720,480);ctx.fillStyle='#e8ecf1';for(let y=0;y<480;y+=18){ctx.fillRect(358,y,4,10)}ctx.fillRect(L.x,L.y,L.w,L.h);ctx.fillRect(R.x,R.y,R.w,R.h);ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();ctx.fillText('You '+ps+' — AI '+as,10,20);ctx.fillText('First to '+target,620,20)}
-(function loop(){upd();draw();requestAnimationFrame(loop)})();serve('ai');<\/script>`;
-
-const CODE_FLAPPY_HTML = `<!doctype html><meta charset="utf-8"><title>Flappy</title><style>body{margin:0;background:#0b0d12;display:flex;align-items:center;justify-content:center;height:100vh}canvas{background:#06080e;border:1px solid #2b3040;border-radius:12px}</style><canvas id=c width=640 height=480></canvas><script>
-const c=document.getElementById('c'),x=c.getContext('2d');let sc=0,b={x:120,y:240,vy:0},P=[],t=0,over=false;
-function flap(){b.vy=-6} onkeydown=e=>{if(e.code==='Space')flap()}; c.onmousedown=flap;
-function spawn(){const g=140,top=60+Math.random()*240;P.push({x:700,top, gap=g})}
-function u(){if(over)return; t++; if(t%90===0)spawn(); b.vy+=.35;b.y+=b.vy; P.forEach(p=>p.x-=3); P=P.filter(p=>p.x>-60);
- for(const p of P){ if(b.x>p.x-30&&b.x<p.x+30&&(b.y<p.top-20||b.y>p.top+p.gap+20)) over=true; if(!p.passed&&b.x>p.x+30){p.passed=1;sc++} }
- if(b.y>480||b.y<0) over=true}
-function d(){x.clearRect(0,0,640,480);x.fillStyle='#ffd166';x.beginPath();x.arc(b.x,b.y,12,0,7);x.fill();
- x.fillStyle='#7c5cff';P.forEach(p=>{x.fillRect(p.x-30,0,60,p.top-20);x.fillRect(p.x-30,p.top+p.gap+20,60,480-(p.top+p.gap+20))});
- x.fillStyle='#e8ecf1';x.fillText('Score '+sc,10,20); if(over)x.fillText('Game Over - refresh to restart',200,240)}
-(function loop(){u();d();requestAnimationFrame(loop)})();<\/script>`;
-
-// Fill code panes with hub start() source + standalone files
-function populateBackendOnce(){
-  if(backendPopulated) return;
-  const byId = id => document.getElementById(id);
-  const map = {
-    ttt:      {hub:'tttHub',       html:'tttStandalone',       code: CODE_TTT_HTML},
-    invaders: {hub:'invadersHub',  html:'invadersStandalone',  code: CODE_INVADERS_HTML},
-    pong:     {hub:'pongHub',      html:'pongStandalone',      code: CODE_PONG_HTML},
-    flappy:   {hub:'flappyHub',    html:'flappyStandalone',    code: CODE_FLAPPY_HTML},
-    pongInvaders:{hub:'piHub',     html:'piStandalone',        code: CODE_PI_HTML},
-  };
-  for(const g of GAMES){
-    if(map[g.id]){
-      byId(map[g.id].hub).value = (g.start && g.start.toString()) || 'Not available';
-      byId(map[g.id].html).value = map[g.id].code;
+function t48Draw(){
+  t48Grid.innerHTML='';
+  for(let i=0;i<16;i++){
+    const d=document.createElement('div'); d.className='card'; d.style.textAlign='center'; d.style.fontSize='22px'; d.style.padding='20px 0';
+    d.textContent = t48Board[i]||''; t48Grid.appendChild(d);
+  }
+  t48Score.textContent = `Score: ${t48Pts}`;
+}
+function t48Spawn(){
+  const empty = t48Board.map((v,i)=> v?null:i).filter(v=>v!==null); if(empty.length===0) return;
+  const idx = empty[Math.floor(Math.random()*empty.length)];
+  t48Board[idx] = Math.random()<0.9?2:4; t48Draw();
+}
+function t48Slide(arr){ // slide & merge one row
+  const row = arr.filter(v=>v); for(let i=0;i<row.length-1;i++){ if(row[i]===row[i+1]){ row[i]*=2; t48Pts+=row[i]; row[i+1]=0; i++; } }
+  return [...row.filter(v=>v), ...Array(4-row.filter(v=>v).length).fill(0)];
+}
+function t48Move(dir){
+  let moved=false; const g=[0,1,2,3].map(r=> t48Board.slice(r*4,r*4+4));
+  if(dir==='L'){ for(let r=0;r<4;r++){ const n=t48Slide(g[r]); if(n.toString()!=g[r].toString()){ moved=true; g[r]=n; } } }
+  if(dir==='R'){ for(let r=0;r<4;r++){ const rev=[...g[r]].reverse(); const n=t48Slide(rev).reverse(); if(n.toString()!=g[r].toString()){ moved=true; g[r]=n; } } }
+  if(dir==='U'){ for(let c=0;c<4;c++){ const col=[g[0][c],g[1][c],g[2][c],g[3][c]]; const n=t48Slide(col); for(let r=0;r<4;r++){ if(g[r][c]!==n[r]) moved=true; g[r][c]=n[r]; } } }
+  if(dir==='D'){ for(let c=0;c<4;c++){ const col=[g[0][c],g[1][c],g[2][c],g[3][c]].reverse(); const n=t48Slide(col).reverse(); for(let r=0;r<4;r++){ if(g[r][c]!==n[r]) moved=true; g[r][c]=n[r]; } } }
+  if(moved){ t48Board = g.flat(); t48Spawn(); t48Draw();
+    if(cheats.t2048){ // keep pushing score toward win
+      const i = t48Board.indexOf(0); if(i!==-1) t48Board[i]=1024; t48Draw();
     }
   }
-  backendPopulated = true;
 }
-
-// Copy & Download handlers
-backendModal.addEventListener('click', (e)=>{
-  const copyId = e.target?.dataset?.copy;
-  if(copyId){
-    const ta = document.getElementById(copyId);
-    ta.focus(); ta.select();
-    document.execCommand('copy');
-    e.target.textContent = 'Copied!';
-    setTimeout(()=>e.target.textContent='Copy ' + (copyId.includes('Hub')?'Hub Script':'Standalone'), 800);
-  }
-  const dlId = e.target?.dataset?.download;
-  if(dlId){
-    const fn = e.target.dataset.fn || 'game.html';
-    const txt = document.getElementById(dlId).value;
-    const blob = new Blob([txt], {type:'text/html'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fn; a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
-  }
+function t48InstantWin(){
+  // place a 2048 tile and high score
+  t48Board[0]=2048; for(let i=1;i<16;i++) t48Board[i]=0; t48Pts=99999; t48Draw();
+}
+window.addEventListener('keydown', e=>{
+  const k=e.key.toLowerCase(); if(['arrowleft','a'].includes(k)) t48Move('L');
+  if(['arrowright','d'].includes(k)) t48Move('R');
+  if(['arrowup','w'].includes(k)) t48Move('U');
+  if(['arrowdown','s'].includes(k)) t48Move('D');
 });
+// simple touch swipe
+let t48Touch=null; t48Grid.addEventListener('touchstart',e=>{ t48Touch=[e.touches[0].clientX,e.touches[0].clientY]; });
+t48Grid.addEventListener('touchend',e=>{ if(!t48Touch) return; const dx=e.changedTouches[0].clientX-t48Touch[0]; const dy=e.changedTouches[0].clientY-t48Touch[1];
+  if(Math.abs(dx)>Math.abs(dy)){ if(dx>20) t48Move('R'); if(dx<-20) t48Move('L'); } else { if(dy>20) t48Move('D'); if(dy<-20) t48Move('U'); } t48Touch=null; });
 
-/**************************************************************************
- * FPS helper
- **************************************************************************/
-let lastTime=performance.now(), frames=0, fps=0; function showFPS(ctx,c){ frames++; const now=performance.now(); if(now-lastTime>1000){ fps=frames; frames=0; lastTime=now; } ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillText('FPS '+fps, c.width-60, 20); }
+t48Init();
 
-/**************************************************************************
- * Boot
- **************************************************************************/
-buildNav();
-if(GAMES.length){ loadGame(0); }
+// ---------- Pong ----------
+const pgCanvas = document.getElementById('pong-cv');
+const pgCtx = pgCanvas.getContext('2d');
+const pgStart = document.getElementById('pong-start');
+const pgReset = document.getElementById('pong-reset');
+const pgScoreEl = document.getElementById('pong-score');
+let pgApp;
+function pongInit(){
+  const W = pgCanvas.clientWidth; const H = Math.floor(W*0.583); pgCanvas.width=W; pgCanvas.height=H;
+  const st = { px:W/2, py:H-20, pw:120, ph:10, bx:W/2, by:H/2, bvx:3, bvy:3, cx:W/2, cw:120, scoreP:0, scoreC:0, running:false };
+  function reset(){ st.px=W/2; st.bx=W/2; st.by=H/2; st.bvx=3; st.bvy=3; st.scoreP=0; st.scoreC=0; }
+  function draw(){
+    pgCtx.clearRect(0,0,W,H);
+    // center line
+    pgCtx.fillStyle='#223'; pgCtx.fillRect(W/2-1,0,2,H);
+    // paddles
+    pgCtx.fillStyle='#60a5fa'; pgCtx.fillRect(st.px-st.pw/2, H-20, st.pw, st.ph);
+    pgCtx.fillStyle='#34d399'; pgCtx.fillRect(st.cx-st.cw/2, 10, st.cw, st.ph);
+    // ball
+    pgCtx.fillStyle='#eab308'; pgCtx.beginPath(); pgCtx.arc(st.bx,st.by,8,0,Math.PI*2); pgCtx.fill();
+  }
+  function step(){
+    // move ball
+    st.bx += st.bvx; st.by += st.bvy;
+    if(st.bx<8||st.bx>W-8) st.bvx*=-1;
+    // collide with paddles
+    if(st.by>H-30 && Math.abs(st.bx-st.px)<(st.pw/2+8)) st.bvy = -Math.abs(st.bvy);
+    if(st.by<30 && Math.abs(st.bx-st.cx)<(st.cw/2+8)) st.bvy = Math.abs(st.bvy);
+    // cpu follows ball
+    st.cx += (st.bx - st.cx)*0.08;
+    // scoring
+    if(st.by>H+8){ st.scoreC++; if(!cheats.pong) { st.bx=W/2; st.by=H/2; } }
+    if(st.by<-8){ st.scoreP++; st.bx=W/2; st.by=H/2; }
+    if(cheats.pong){ st.scoreP = Math.max(st.scoreP, 11); }
+    pgScoreEl.textContent = `You ${st.scoreP} : ${st.scoreC} CPU`;
+    draw();
+    if(pgApp?.running) requestAnimationFrame(step);
+  }
+  function onMove(e){ const r=pgCanvas.getBoundingClientRect(); const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left; st.px = Math.max(st.pw/2, Math.min(W-st.pw/2, x)); }
+  pgCanvas.onmousemove=onMove; pgCanvas.ontouchmove=onMove;
+  pgApp = { start(){ if(!pgApp.running){ pgApp.running=true; requestAnimationFrame(step);} }, reset(){ reset(); pgCtx.clearRect(0,0,W,H); pgScoreEl.textContent='You 0 : 0 CPU'; pgApp.running=false; } };
+}
+pgStart.addEventListener('click', ()=> pgApp?.start());
+pgReset.addEventListener('click', ()=> pgApp?.reset());
+pongInit();
+window.addEventListener('resize', pongInit);
 
-// Keyboard shortcuts for modals
-window.addEventListener('keydown', (e)=>{
-  if(e.key==='Escape'){ document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open')); }
-});
 </script>
 </body>
 </html>
