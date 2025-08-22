@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Samie — Mini Game Hub (Single-File)</title>
+<title>Samie — Mini Game Hub</title>
 <style>
   :root{
     --bg:#0e0f13; --panel:#171922; --ink:#e8ecf1; --muted:#b7bec9; --accent:#6ae3ff; --accent2:#8b5cf6; --good:#22c55e; --bad:#ef4444; --scale:1;
@@ -31,14 +31,12 @@
   .pill{padding:6px 10px;border-radius:999px;border:1px solid #2a2f3d;background:#1a1f2c}
   .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace;background:#0b0e15;border:1px solid #1f2331;padding:2px 6px;border-radius:6px}
   canvas{background:#0b0d12;border:1px solid #22283a;border-radius:12px;width:100%;height:auto}
-  /* Sudoku */
   .sudoku{width:min(520px,95vw)}
   .sudoku-grid{display:grid;grid-template-columns:repeat(9,1fr);border:2px solid #3a4156;border-radius:10px;overflow:hidden}
   .sudoku-grid input{width:100%;aspect-ratio:1/1;text-align:center;font-size:18px;background:#0b0e15;color:var(--ink);border:1px solid #2a2f3d}
-  .sudoku-grid input:focus{outline:2px solid var(--accent)}
+  .sudoku-grid input:focus{outline:2px solid #6ae3ff}
   .sudoku-grid input[data-fixed="1"]{background:#111624;color:#9dc1ff}
   .notice{color:var(--muted)}
-  /* Modal */
   .modal-backdrop{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
   .modal{max-width:900px;width:100%;background:var(--panel);border:1px solid #2a2f3d;border-radius:16px;box-shadow:0 10px 40px #0009}
   .modal header{border-bottom:1px solid #2a2f3d}
@@ -49,7 +47,6 @@
   .switch input{width:18px;height:18px}
   .github-card{display:flex;gap:12px;align-items:center;border:1px dashed #334; padding:12px;border-radius:12px;margin-top:12px}
   .muted{color:var(--muted)}
-  /* Settings */
   #settingsBar{display:flex;gap:10px;align-items:center}
   @media (max-width: 860px){
     .app{grid-template-columns:1fr}
@@ -72,7 +69,7 @@
       <button class="btn nav" data-target="twenty48"><span>🧮</span> 2048</button>
       <button class="btn nav" data-target="pong"><span>🏓</span> Pong</button>
       <div class="grow"></div>
-      <button id="btn-admin" class="btn"><span>🛠️</span> Admin / Cheats</button>
+      <button id="btn-admin" class="btn"><span>🛠️</span> Admin</button>
     </aside>
 
     <div class="main">
@@ -94,7 +91,7 @@
       <div class="stage">
         <div id="screen-home" class="card">
           <h2>Welcome 👋</h2>
-          <p>Tap a game on the left. Everything loads inside this page. Use <span class="kbd">🛠️ Admin / Cheats</span> (password <strong>6767</strong>) for <strong>Auto‑Win</strong> and other toggles.</p>
+          <p>Tap a game on the left. Use <span class="kbd">🛠️ Admin</span> (password <strong>6767</strong>) for <strong>cheats</strong> like Auto‑Win and God Mode.</p>
           <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
             <div class="card"><h3>❌⭕ Tic Tac Toe</h3><p>Classic 3x3 duel vs AI.</p></div>
             <div class="card"><h3>🔢 Sudoku</h3><p>Fill 1–9 without repeats.</p></div>
@@ -186,16 +183,17 @@
     </div>
   </div>
 
-  <!-- Admin / Cheats Modal (password 6767) -->
+  <!-- Admin Modal (password 6767) -->
   <div class="modal-backdrop" id="admin-modal">
     <div class="modal">
       <header>
         <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
-          <strong>Admin / Cheats</strong>
+          <strong>Admin</strong>
           <button id="admin-close" class="btn">Close</button>
         </div>
       </header>
       <div class="body">
+        <p class="muted">Enter <strong>6767</strong> to unlock cheats.</p>
         <div class="row">
           <div class="col">
             <h3>Global Cheats</h3>
@@ -217,7 +215,7 @@
           <div style="font-size:28px">🐙</div>
           <div>
             <div><strong>GitHub — Tic Tac Toe</strong></div>
-            <div class="muted">As requested, always show this card at the bottom.</div>
+            <div class="muted">Always shown, per your preference.</div>
             <div><a href="https://github.com/Sami121212467/tic-tac-toe" target="_blank" rel="noopener">github.com/Sami121212467/tic-tac-toe</a></div>
           </div>
         </div>
@@ -226,7 +224,7 @@
   </div>
 
 <script>
-// ---------- Router (inside-page) ----------
+// ---------- Router ----------
 const screens = {
   home: document.getElementById('screen-home'),
   tic: document.getElementById('screen-tic'),
@@ -245,6 +243,8 @@ document.querySelectorAll('.nav').forEach(btn=>{
     btn.classList.add('active');
     screens[target].classList.remove('hidden');
     titleEl.textContent = btn.textContent.trim();
+    // when switching to flappy, ensure it sizes after visible
+    if(target==='flappy' && !flApp){ flappySetup(); }
   })
 });
 
@@ -353,48 +353,35 @@ function sudokuSolve(){ sudokuInputs.forEach((inp,i)=>{ inp.value=String(S_SOL[i
 
 sudokuCheck.addEventListener('click', sudokuCheckNow); sudokuHint.addEventListener('click', sudokuGiveHint); sudokuReset.addEventListener('click', sudokuInit); sudokuInit();
 
-// ---------- Flappy Bird (fixed start/stop) ----------
+// ---------- Flappy Bird (robust) ----------
 const flCanvas = document.getElementById('flappy-cv');
 const flCtx = flCanvas.getContext('2d');
 const flStart = document.getElementById('flappy-start');
 const flReset = document.getElementById('flappy-reset');
 const flScoreEl = document.getElementById('flappy-score');
 let flApp=null;
+function flappyVisible(){ return !document.getElementById('screen-flappy').classList.contains('hidden'); }
 function flappySetup(){
-  const W = flCanvas.clientWidth; const H = Math.floor(W*1.333); flCanvas.width=W; flCanvas.height=H;
-  const state = { y:H/2, v:0, g:0.6, flap:-9, pipes:[], t:0, score:0, alive:true };
+  const wrap = flCanvas.parentElement; // handle hidden width=0
+  const W = Math.max(240, wrap.clientWidth || 320);
+  const H = Math.floor(W*1.333);
+  flCanvas.width=W; flCanvas.height=H;
+  const state = { mode:'idle', y:H/2, v:0, g:0.6, flap:-9, pipes:[], t:0, score:0 };
   function spawn(){ const gap=160; const top = 60 + Math.random()*(H-120-gap); state.pipes.push({ x:W+40, top, bottom: top+gap, w:60, passed:false }); }
-  function reset(){ state.y=H/2; state.v=0; state.pipes=[]; state.t=0; state.score=0; state.alive=true; flCtx.clearRect(0,0,W,H); flScoreEl.textContent='Score: 0'; }
-  function step(){
-    flCtx.clearRect(0,0,W,H);
-    if(state.alive || cheats.god){ state.v += state.g; state.y += state.v; }
-    if(state.y>H-20){ if(!cheats.god) state.alive=false; state.y=H-20; state.v=0; }
-    if(state.y<20){ state.y=20; state.v=0; }
-    if(state.t%90===0) spawn();
-    state.pipes.forEach(p=>{ p.x -= 3; });
-    state.pipes = state.pipes.filter(p=> p.x>-100);
-    flCtx.fillStyle = '#2dd4bf';
-    state.pipes.forEach(p=>{
-      flCtx.fillRect(p.x, 0, p.w, p.top);
-      flCtx.fillRect(p.x, p.bottom, p.w, H-p.bottom);
-      if(!p.passed && p.x+ p.w < 80){ p.passed=true; state.score++; }
-      const withinX = 60 > p.x && 60 < p.x + p.w;
-      const hit = (state.y-12 < p.top || state.y+12 > p.bottom) && withinX;
-      if(hit && !cheats.god) state.alive=false;
-    });
-    flCtx.fillStyle = '#60a5fa'; flCtx.beginPath(); flCtx.arc(60, state.y, 12, 0, Math.PI*2); flCtx.fill();
-    if(cheats.flappy) state.score += 1; flScoreEl.textContent = `Score: ${state.score}`;
-    state.t++; if(flApp?.running) requestAnimationFrame(step);
-  }
-  function flap(){ state.v = state.flap; }
-  flCanvas.onpointerdown = flap; window.addEventListener('keydown', e=>{ if(e.code==='Space') flap(); });
-  flApp = { start(){ if(!flApp.running){ flApp.running=true; requestAnimationFrame(step);} }, reset(){ reset(); flApp.running=false; } };
+  function overlay(msg){ flCtx.fillStyle='#ffffffaa'; flCtx.font='20px system-ui'; flCtx.textAlign='center'; flCtx.fillText(msg, W/2, H/2); }
+  function draw(){ flCtx.clearRect(0,0,W,H); flCtx.fillStyle = '#2dd4bf'; state.pipes.forEach(p=>{ flCtx.fillRect(p.x,0,p.w,p.top); flCtx.fillRect(p.x,p.bottom,p.w,H-p.bottom); }); flCtx.fillStyle = '#60a5fa'; flCtx.beginPath(); flCtx.arc(60, state.y, 12, 0, Math.PI*2); flCtx.fill(); if(state.mode!=='run') overlay(state.mode==='idle'?'Tap or press Start':'Game Over — Tap Reset or Start'); }
+  function step(){ if(state.mode!=='run') return; state.v += state.g; state.y += state.v; if(state.y>H-20){ state.y=H-20; state.v=0; if(!cheats.god) state.mode='dead'; } if(state.y<20){ state.y=20; state.v=0; } if(state.t%90===0) spawn(); state.pipes.forEach(p=> p.x -= 3); state.pipes = state.pipes.filter(p=> p.x>-100); state.pipes.forEach(p=>{ if(!p.passed && p.x + p.w < 60){ p.passed=true; state.score++; } const withinX = 60 > p.x && 60 < p.x + p.w; const hit = (state.y-12 < p.top || state.y+12 > p.bottom) && withinX; if(hit && !cheats.god) state.mode='dead'; }); if(cheats.flappy) state.score += 1; flScoreEl.textContent = `Score: ${state.score}`; state.t++; draw(); if(flApp.running) requestAnimationFrame(step); }
+  function hardReset(){ state.mode='idle'; state.y=H/2; state.v=0; state.pipes=[]; state.t=0; state.score=0; flScoreEl.textContent='Score: 0'; draw(); }
+  function flap(){ if(state.mode==='idle'){ start(); } state.v = state.flap; }
+  function start(){ if(state.mode!=='run'){ state.mode='run'; if(!flApp.running){ flApp.running=true; } requestAnimationFrame(step); } }
+  function reset(){ hardReset(); flApp.running=false; }
+  flCanvas.onpointerdown = flap; window.addEventListener('keydown', e=>{ if(!flappyVisible()) return; if(e.code==='Space') flap(); }); hardReset(); flApp = { start, reset, running:false };
 }
 flStart.addEventListener('click', ()=>{ if(!flApp) flappySetup(); flApp.start(); });
-flReset.addEventListener('click', ()=> flApp&&flApp.reset());
-window.addEventListener('resize', ()=>{ const running = flApp?.running; flappySetup(); if(running) flApp.start(); });
+flReset.addEventListener('click', ()=> flApp && flApp.reset());
+window.addEventListener('resize', ()=>{ if(!flappyVisible()) return; const was = flApp?.running; flappySetup(); if(was) flApp.start(); });
 
-// ---------- Space Invaders (fixed) ----------
+// ---------- Space Invaders ----------
 const shCanvas = document.getElementById('shoot-cv');
 const shCtx = shCanvas.getContext('2d');
 const shStart = document.getElementById('shoot-start');
@@ -444,7 +431,7 @@ let t48Touch=null; t48Grid.addEventListener('touchstart',e=>{ t48Touch=[e.touche
 
 t48Init();
 
-// ---------- Pong (fixed) ----------
+// ---------- Pong ----------
 const pgCanvas = document.getElementById('pong-cv');
 const pgCtx = pgCanvas.getContext('2d');
 const pgStart = document.getElementById('pong-start');
