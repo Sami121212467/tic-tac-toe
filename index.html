@@ -30,7 +30,7 @@
   .toolbar{display:flex;gap:8px;flex-wrap:wrap}
   .pill{padding:6px 10px;border-radius:999px;border:1px solid #2a2f3d;background:#1a1f2c}
   .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace;background:#0b0e15;border:1px solid #1f2331;padding:2px 6px;border-radius:6px}
-  canvas{background:#0b0d12;border:1px solid #22283a;border-radius:12px;width:100%;height:auto}
+  canvas{background:#0b0d12;border:1px solid #22283a;border-radius:12px;width:100%;height:auto;max-width:960px}
   .sudoku{width:min(520px,95vw)}
   .sudoku-grid{display:grid;grid-template-columns:repeat(9,1fr);border:2px solid #3a4156;border-radius:10px;overflow:hidden}
   .sudoku-grid input{width:100%;aspect-ratio:1/1;text-align:center;font-size:18px;background:#0b0e15;color:var(--ink);border:1px solid #2a2f3d}
@@ -78,13 +78,15 @@
         <div id="settingsBar" class="toolbar">
           <label class="pill">Size
             <select id="sizeSel" style="background:transparent;border:none;color:var(--ink);margin-left:6px">
-              <option value="1">Default</option>
+              <option value="0.7">X‑Small</option>
+              <option value="0.85">Small</option>
+              <option value="1" selected>Default</option>
               <option value="1.25">Large</option>
               <option value="1.5">X‑Large</option>
             </select>
           </label>
           <label class="pill"><input type="checkbox" id="mobileToggle"/> Mobile Mode</label>
-          <span class="pill">Inside‑Page</span>
+          <!-- Removed the Inside‑Page button per request -->
         </div>
       </header>
 
@@ -93,7 +95,7 @@
           <h2>Welcome 👋</h2>
           <p>Tap a game on the left. Use <span class="kbd">🛠️ Admin</span> (password <strong>6767</strong>) for <strong>cheats</strong> like Auto‑Win and God Mode.</p>
           <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
-            <div class="card"><h3>❌⭕ Tic Tac Toe</h3><p>Classic 3x3 duel vs AI.</p></div>
+            <div class="card"><h3>❌⭕ Tic Tac Toe</h3><p>Classic 3x3 — vs CPU or with a friend.</p></div>
             <div class="card"><h3>🔢 Sudoku</h3><p>Fill 1–9 without repeats.</p></div>
             <div class="card"><h3>🐥 Flappy Bird</h3><p>Tap/click/space to flap.</p></div>
             <div class="card"><h3>🚀 Space Invaders</h3><p>Move & shoot waves of enemies.</p></div>
@@ -107,10 +109,22 @@
           <div class="game-wrap">
             <div class="toolbar">
               <button class="btn" id="tic-reset">Reset</button>
+              <label class="pill">Mode
+                <select id="tic-mode" style="background:transparent;border:none;color:var(--ink);margin-left:6px">
+                  <option value="cpu" selected>Vs CPU</option>
+                  <option value="pvp">With a Friend</option>
+                </select>
+              </label>
+              <label class="pill" id="tic-diff-wrap">Difficulty
+                <select id="tic-diff" style="background:transparent;border:none;color:var(--ink);margin-left:6px">
+                  <option value="easy">Easy</option>
+                  <option value="normal" selected>Normal</option>
+                </select>
+              </label>
               <span class="pill">First to 3 in a row wins</span>
               <span class="pill" id="tic-status">Your turn (X)</span>
             </div>
-            <div id="tic-grid" class="card" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:380px"></div>
+            <div id="tic-grid" class="card" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:360px"></div>
           </div>
         </section>
 
@@ -137,7 +151,7 @@
               <span class="pill">Tap/Click/Space to flap</span>
               <span class="pill" id="flappy-score">Score: 0</span>
             </div>
-            <canvas id="flappy-cv" width="480" height="640"></canvas>
+            <canvas id="flappy-cv" width="360" height="540"></canvas>
           </div>
         </section>
 
@@ -150,7 +164,7 @@
               <span class="pill">Move ← →, Shoot Space</span>
               <span class="pill" id="shoot-score">Score: 0</span>
             </div>
-            <canvas id="shoot-cv" width="720" height="480"></canvas>
+            <canvas id="shoot-cv" width="600" height="400"></canvas>
           </div>
         </section>
 
@@ -175,7 +189,7 @@
               <span class="pill">Move mouse / touch to control</span>
               <span class="pill" id="pong-score">You 0 : 0 CPU</span>
             </div>
-            <canvas id="pong-cv" width="720" height="420"></canvas>
+            <canvas id="pong-cv" width="600" height="360"></canvas>
           </div>
         </section>
 
@@ -250,9 +264,8 @@ document.querySelectorAll('.nav').forEach(btn=>{
 
 // ---------- Settings (size + mobile) ----------
 const sizeSel = document.getElementById('sizeSel');
-sizeSel.addEventListener('change', ()=>{
-  document.documentElement.style.setProperty('--scale', sizeSel.value);
-});
+function applyScale(){ document.documentElement.style.setProperty('--scale', sizeSel.value); }
+sizeSel.addEventListener('change', applyScale); applyScale();
 document.getElementById('mobileToggle').addEventListener('change', (e)=>{
   document.body.classList.toggle('mobile', e.target.checked);
 });
@@ -285,7 +298,6 @@ function bindCheat(id, key, onToggle){
     onToggle && onToggle(el.checked);
   });
 }
-
 bindCheat('ch-god','god');
 bindCheat('ch-autowin-all','autowinAll');
 bindCheat('ch-autowin-tic','tic', (v)=>{ if(v) ticAutoWin(); });
@@ -299,31 +311,53 @@ bindCheat('ch-autowin-pong','pong', (v)=>{ if(v) pongInstantWin(); });
 const ticGrid = document.getElementById('tic-grid');
 const ticStatus = document.getElementById('tic-status');
 const ticReset = document.getElementById('tic-reset');
-let ticBoard, ticOver;
+const ticModeSel = document.getElementById('tic-mode');
+const ticDiffSel = document.getElementById('tic-diff');
+const ticDiffWrap = document.getElementById('tic-diff-wrap');
+
+let ticBoard, ticOver, ticTurn; // ticTurn: 'X' or 'O' for PvP
 function ticInit(){
-  ticBoard = Array(9).fill(''); ticOver=false; ticStatus.textContent = 'Your turn (X)';
+  ticBoard = Array(9).fill(''); ticOver=false; ticTurn='X'; ticStatus.textContent = 'Your turn (X)';
   ticGrid.innerHTML='';
   for(let i=0;i<9;i++){
     const c=document.createElement('button');
-    c.className='btn'; c.style.height='100px'; c.style.fontSize='28px'; c.dataset.idx=i;
+    c.className='btn'; c.style.height='90px'; c.style.fontSize='28px'; c.dataset.idx=i;
     c.addEventListener('click', ()=> ticPlay(i));
     ticGrid.appendChild(c);
   }
+  ticDiffWrap.style.display = (ticModeSel.value==='cpu') ? 'inline-flex' : 'none';
 }
 function ticWin(b,p){
   const L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
   return L.some(([a,b2,c])=> b[a]===p && b[b2]===p && b[c]===p);
 }
 function ticPlay(i){
-  if(ticOver||ticBoard[i]) return; ticBoard[i]='X';
-  ticGrid.children[i].textContent='X';
-  if(ticWin(ticBoard,'X')){ticStatus.textContent='You win!'; ticOver=true; return;}
-  if(ticBoard.every(x=>x)){ticStatus.textContent='Draw'; ticOver=true; return;}
-  const move = ticBestMove('O');
-  if(move!==-1){ ticBoard[move]='O'; ticGrid.children[move].textContent='O'; if(ticWin(ticBoard,'O')){ticStatus.textContent='CPU wins'; ticOver=true; return;} }
-  if(ticBoard.every(x=>x)){ticStatus.textContent='Draw'; ticOver=true; return;}
+  if(ticOver||ticBoard[i]) return;
+  if(ticModeSel.value==='cpu'){
+    // player move
+    ticBoard[i]='X'; ticGrid.children[i].textContent='X';
+    if(ticWin(ticBoard,'X')){ticStatus.textContent='You win!'; ticOver=true; return;}
+    if(ticBoard.every(x=>x)){ticStatus.textContent='Draw'; ticOver=true; return;}
+    // CPU move
+    const move = (ticDiffSel.value==='easy') ? ticRandomMove() : ticBestMove('O');
+    if(move!==-1){ ticBoard[move]='O'; ticGrid.children[move].textContent='O'; }
+    if(ticWin(ticBoard,'O')){ticStatus.textContent='CPU wins'; ticOver=true; return;}
+    if(ticBoard.every(x=>x)){ticStatus.textContent='Draw'; ticOver=true; return;}
+  } else {
+    // PvP local
+    ticBoard[i]=ticTurn; ticGrid.children[i].textContent=ticTurn;
+    if(ticWin(ticBoard,ticTurn)){ ticStatus.textContent = (ticTurn==='X'?'Player 1':'Player 2')+' wins!'; ticOver=true; return; }
+    if(ticBoard.every(x=>x)){ ticStatus.textContent='Draw'; ticOver=true; return; }
+    ticTurn = (ticTurn==='X'?'O':'X');
+    ticStatus.textContent = (ticTurn==='X'?'Player 1':'Player 2')+' turn ('+ticTurn+')';
+  }
+}
+function ticRandomMove(){
+  const free = ticBoard.map((v,i)=> v?null:i).filter(v=>v!==null);
+  return free.length? free[Math.floor(Math.random()*free.length)] : -1;
 }
 function ticBestMove(p){
+  // simple heuristic (winnable for player): win-if-can, block, center, corner, side
   for(let i=0;i<9;i++){ if(!ticBoard[i]){ ticBoard[i]=p; if(ticWin(ticBoard,p)){ ticBoard[i]=''; return i;} ticBoard[i]=''; } }
   const o = p==='O'?'X':'O';
   for(let i=0;i<9;i++){ if(!ticBoard[i]){ ticBoard[i]=o; if(ticWin(ticBoard,o)){ ticBoard[i]=''; return i;} ticBoard[i]=''; } }
@@ -334,7 +368,10 @@ function ticAutoWin(){
   for(const L of lines){ if(L.every(i=>!ticBoard[i])){ L.forEach(i=>{ ticBoard[i]='X'; ticGrid.children[i].textContent='X'; }); ticStatus.textContent='You win! (Auto‑Win)'; ticOver=true; return; } }
 }
 
-ticReset.addEventListener('click', ticInit); ticInit();
+ticReset.addEventListener('click', ticInit);
+ticModeSel.addEventListener('change', ticInit);
+ticDiffSel.addEventListener('change', ()=>{});
+ticInit();
 
 // ---------- Sudoku (single puzzle) ----------
 const sudokuGrid = document.getElementById('sudoku-grid');
@@ -353,7 +390,7 @@ function sudokuSolve(){ sudokuInputs.forEach((inp,i)=>{ inp.value=String(S_SOL[i
 
 sudokuCheck.addEventListener('click', sudokuCheckNow); sudokuHint.addEventListener('click', sudokuGiveHint); sudokuReset.addEventListener('click', sudokuInit); sudokuInit();
 
-// ---------- Flappy Bird (robust) ----------
+// ---------- Flappy Bird (robust & adaptive) ----------
 const flCanvas = document.getElementById('flappy-cv');
 const flCtx = flCanvas.getContext('2d');
 const flStart = document.getElementById('flappy-start');
@@ -363,14 +400,14 @@ let flApp=null;
 function flappyVisible(){ return !document.getElementById('screen-flappy').classList.contains('hidden'); }
 function flappySetup(){
   const wrap = flCanvas.parentElement; // handle hidden width=0
-  const W = Math.max(240, wrap.clientWidth || 320);
+  const W = Math.max(220, Math.min(600, wrap.clientWidth || 320));
   const H = Math.floor(W*1.333);
   flCanvas.width=W; flCanvas.height=H;
   const state = { mode:'idle', y:H/2, v:0, g:0.6, flap:-9, pipes:[], t:0, score:0 };
-  function spawn(){ const gap=160; const top = 60 + Math.random()*(H-120-gap); state.pipes.push({ x:W+40, top, bottom: top+gap, w:60, passed:false }); }
+  function spawn(){ const gap=Math.max(120, Math.min(200, Math.floor(W*0.28))); const top = 60 + Math.random()*(H-120-gap); state.pipes.push({ x:W+40, top, bottom: top+gap, w:Math.max(50, Math.floor(W*0.12)), passed:false }); }
   function overlay(msg){ flCtx.fillStyle='#ffffffaa'; flCtx.font='20px system-ui'; flCtx.textAlign='center'; flCtx.fillText(msg, W/2, H/2); }
   function draw(){ flCtx.clearRect(0,0,W,H); flCtx.fillStyle = '#2dd4bf'; state.pipes.forEach(p=>{ flCtx.fillRect(p.x,0,p.w,p.top); flCtx.fillRect(p.x,p.bottom,p.w,H-p.bottom); }); flCtx.fillStyle = '#60a5fa'; flCtx.beginPath(); flCtx.arc(60, state.y, 12, 0, Math.PI*2); flCtx.fill(); if(state.mode!=='run') overlay(state.mode==='idle'?'Tap or press Start':'Game Over — Tap Reset or Start'); }
-  function step(){ if(state.mode!=='run') return; state.v += state.g; state.y += state.v; if(state.y>H-20){ state.y=H-20; state.v=0; if(!cheats.god) state.mode='dead'; } if(state.y<20){ state.y=20; state.v=0; } if(state.t%90===0) spawn(); state.pipes.forEach(p=> p.x -= 3); state.pipes = state.pipes.filter(p=> p.x>-100); state.pipes.forEach(p=>{ if(!p.passed && p.x + p.w < 60){ p.passed=true; state.score++; } const withinX = 60 > p.x && 60 < p.x + p.w; const hit = (state.y-12 < p.top || state.y+12 > p.bottom) && withinX; if(hit && !cheats.god) state.mode='dead'; }); if(cheats.flappy) state.score += 1; flScoreEl.textContent = `Score: ${state.score}`; state.t++; draw(); if(flApp.running) requestAnimationFrame(step); }
+  function step(){ if(state.mode!=='run') return; state.v += state.g; state.y += state.v; if(state.y>H-20){ state.y=H-20; state.v=0; if(!cheats.god) state.mode='dead'; } if(state.y<20){ state.y=20; state.v=0; } if(state.t%90===0) spawn(); state.pipes.forEach(p=> p.x -= Math.max(2, Math.floor(W/240))); state.pipes = state.pipes.filter(p=> p.x>-100); state.pipes.forEach(p=>{ if(!p.passed && p.x + p.w < 60){ p.passed=true; state.score++; } const withinX = 60 > p.x && 60 < p.x + p.w; const hit = (state.y-12 < p.top || state.y+12 > p.bottom) && withinX; if(hit && !cheats.god) state.mode='dead'; }); if(cheats.flappy) state.score += 1; flScoreEl.textContent = `Score: ${state.score}`; state.t++; draw(); if(flApp.running) requestAnimationFrame(step); }
   function hardReset(){ state.mode='idle'; state.y=H/2; state.v=0; state.pipes=[]; state.t=0; state.score=0; flScoreEl.textContent='Score: 0'; draw(); }
   function flap(){ if(state.mode==='idle'){ start(); } state.v = state.flap; }
   function start(){ if(state.mode!=='run'){ state.mode='run'; if(!flApp.running){ flApp.running=true; } requestAnimationFrame(step); } }
@@ -381,7 +418,7 @@ flStart.addEventListener('click', ()=>{ if(!flApp) flappySetup(); flApp.start();
 flReset.addEventListener('click', ()=> flApp && flApp.reset());
 window.addEventListener('resize', ()=>{ if(!flappyVisible()) return; const was = flApp?.running; flappySetup(); if(was) flApp.start(); });
 
-// ---------- Space Invaders ----------
+// ---------- Space Invaders (adaptive) ----------
 const shCanvas = document.getElementById('shoot-cv');
 const shCtx = shCanvas.getContext('2d');
 const shStart = document.getElementById('shoot-start');
@@ -389,14 +426,14 @@ const shReset = document.getElementById('shoot-reset');
 const shScoreEl = document.getElementById('shoot-score');
 let shApp=null;
 function shooterSetup(){
-  const W = shCanvas.clientWidth; const H = Math.floor(W*0.666); shCanvas.width=W; shCanvas.height=H;
+  const W = Math.max(320, Math.min(720, shCanvas.parentElement.clientWidth || 600)); const H = Math.floor(W*0.666); shCanvas.width=W; shCanvas.height=H;
   const st = { x:W/2, y:H-40, bullets:[], enemies:[], t:0, score:0, alive:true };
   function spawn(){ st.enemies.push({x: Math.random()* (W-40)+20, y:-20, v: 1+Math.random()*1.5, hp:1}); }
   function reset(){ st.x=W/2; st.y=H-40; st.bullets=[]; st.enemies=[]; st.t=0; st.score=0; st.alive=true; shCtx.clearRect(0,0,W,H); shScoreEl.textContent='Score: 0'; }
   function step(){
     shCtx.clearRect(0,0,W,H);
     shCtx.fillStyle = '#a78bfa'; shCtx.fillRect(st.x-15, st.y-10, 30, 20);
-    st.bullets.forEach(b=> b.y -= 6); st.bullets = st.bullets.filter(b=> b.y>-10);
+    st.bullets.forEach(b=> b.y -= Math.max(5, Math.floor(W/144))); st.bullets = st.bullets.filter(b=> b.y>-10);
     shCtx.fillStyle = '#93c5fd'; st.bullets.forEach(b=> shCtx.fillRect(b.x-2,b.y-10,4,10));
     if(st.t%40===0) spawn(); st.enemies.forEach(e=>{ e.y += e.v; }); st.enemies = st.enemies.filter(e=> e.y < H+40);
     shCtx.fillStyle = '#34d399'; st.enemies.forEach(e=> shCtx.fillRect(e.x-12,e.y-12,24,24));
@@ -431,7 +468,7 @@ let t48Touch=null; t48Grid.addEventListener('touchstart',e=>{ t48Touch=[e.touche
 
 t48Init();
 
-// ---------- Pong ----------
+// ---------- Pong (adaptive) ----------
 const pgCanvas = document.getElementById('pong-cv');
 const pgCtx = pgCanvas.getContext('2d');
 const pgStart = document.getElementById('pong-start');
@@ -439,8 +476,8 @@ const pgReset = document.getElementById('pong-reset');
 const pgScoreEl = document.getElementById('pong-score');
 let pgApp=null;
 function pongSetup(){
-  const W = pgCanvas.clientWidth; const H = Math.floor(W*0.583); pgCanvas.width=W; pgCanvas.height=H;
-  const st = { px:W/2, pw:120, ph:10, bx:W/2, by:H/2, bvx:3, bvy:3, cx:W/2, cw:120, scoreP:0, scoreC:0 };
+  const W = Math.max(320, Math.min(720, pgCanvas.parentElement.clientWidth || 600)); const H = Math.floor(W*0.6); pgCanvas.width=W; pgCanvas.height=H;
+  const st = { px:W/2, pw:Math.max(80, Math.floor(W*0.18)), ph:10, bx:W/2, by:H/2, bvx:3, bvy:3, cx:W/2, cw:Math.max(80, Math.floor(W*0.18)), scoreP:0, scoreC:0 };
   function reset(){ st.px=W/2; st.bx=W/2; st.by=H/2; st.bvx=3; st.bvy=3; st.scoreP=0; st.scoreC=0; pgCtx.clearRect(0,0,W,H); pgScoreEl.textContent='You 0 : 0 CPU'; }
   function draw(){ pgCtx.clearRect(0,0,W,H); pgCtx.fillStyle='#223'; pgCtx.fillRect(W/2-1,0,2,H); pgCtx.fillStyle='#60a5fa'; pgCtx.fillRect(st.px-st.pw/2, H-20, st.pw, st.ph); pgCtx.fillStyle='#34d399'; pgCtx.fillRect(st.cx-st.cw/2, 10, st.cw, st.ph); pgCtx.fillStyle='#eab308'; pgCtx.beginPath(); pgCtx.arc(st.bx,st.by,8,0,Math.PI*2); pgCtx.fill(); }
   function step(){ st.bx += st.bvx; st.by += st.bvy; if(st.bx<8||st.bx>W-8) st.bvx*=-1; if(st.by>H-30 && Math.abs(st.bx-st.px)<(st.pw/2+8)) st.bvy = -Math.abs(st.bvy); if(st.by<30 && Math.abs(st.bx-st.cx)<(st.cw/2+8)) st.bvy = Math.abs(st.bvy); st.cx += (st.bx - st.cx)*0.08; if(st.by>H+8){ st.scoreC++; if(!cheats.pong) { st.bx=W/2; st.by=H/2; } } if(st.by<-8){ st.scoreP++; st.bx=W/2; st.by=H/2; } if(cheats.pong){ st.scoreP = Math.max(st.scoreP, 11); } pgScoreEl.textContent = `You ${st.scoreP} : ${st.scoreC} CPU`; draw(); if(pgApp?.running) requestAnimationFrame(step); }
